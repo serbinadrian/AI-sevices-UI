@@ -1,4 +1,4 @@
-export const useStyles = theme => ({
+export const useStyles = (theme) => ({
   description: {
     "& p": {
       margin: "25px 0 0",
@@ -81,7 +81,7 @@ export const useStyles = theme => ({
   progressBarContainer: {
     marginTop: 60,
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
   },
   sliderContainer: {
     padding: "10px",
@@ -160,17 +160,17 @@ export const useStyles = theme => ({
   imageGenerationContainer: {
     display: "flex",
     flexWrap: "wrap",
-    width: "100%"
+    width: "100%",
   },
   imageGenerationElement: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",    
-    width: "30%",    
+    justifyContent: "center",
+    width: "30%",
     margin: "auto",
-    border: "1px solid #4086FF",    
+    border: "1px solid #4086FF",
     "& img": {
-      width: "100%",      
+      width: "100%",
     },
   },
   imageDescriptionWarning: {
@@ -182,10 +182,10 @@ export const useStyles = theme => ({
     background: "#FDE5E8",
     borderRadius: "4px",
     borderStyle: "solid",
-    fontSize: "16px"
+    fontSize: "16px",
   },
   formStateContainer: {
-     padding: "8px"
+    padding: "8px",
   },
   dropDownEmptyGrid: {
     paddingRight: "0",
@@ -193,16 +193,16 @@ export const useStyles = theme => ({
   labelImageGeneration: {
     padding: "0 10px",
     fontSize: "18px",
-    fontWeight: "600",    
+    fontWeight: "600",
   },
   labelImageGenerationTextArea: {
-    margin: "0"
+    margin: "0",
   },
   labelImageGenerationContainer: {
     margin: "0 0 16px 0",
   },
   imageGenerationTextArea: {
-    textAlign: "center"
+    textAlign: "center",
   },
   resultBtnContainer: { textAlign: "center" },
   newTabImageButton: {
@@ -213,9 +213,7 @@ export const useStyles = theme => ({
     fontSize: "18px",
     color: "#fff",
     position: "absolute",
-    "&:hover": {
-      
-    }
+    "&:hover": {},
   },
   imageFrame: {
     position: "relative",
@@ -225,12 +223,13 @@ export const useStyles = theme => ({
     margin: "15px auto",
     display: "flex",
     "& img": {
-      width: "100%"      
+      width: "100%",
+      overflow: "hidden",
     },
     "&:hover": {
-        "& newTabImageButton": {
-          display: "none"
-        }
-    }
-  }
+      "& newTabImageButton": {
+        display: "none",
+      },
+    },
+  },
 });
