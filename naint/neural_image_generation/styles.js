@@ -222,9 +222,9 @@ export const useStyles = (theme) => ({
     width: "30%",
     margin: "15px auto",
     display: "flex",
+    overflow: "hidden",
     "& img": {
       width: "100%",
-      overflow: "hidden",
     },
     "&:hover": {
       "& newTabImageButton": {
