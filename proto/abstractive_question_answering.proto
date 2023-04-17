@@ -3,7 +3,7 @@ syntax = "proto3";
 package qa;
 
 message Question {
-    string question = 1;
+    string question = 2;
 }
 
 message Answer {

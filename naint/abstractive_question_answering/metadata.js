@@ -16,8 +16,14 @@ export const metadata = {
             wordsMinimumCount: 3,
             wordsLimit: 255,
         },
-        methods: {
-            abstractiveQestionAnswering: "qa"
+        service: {
+            method: "qa",
+            setters: [
+                "setQuestion"
+            ],
+            getters: [
+                "getAnswer"
+            ]
         },
     },
     render: {

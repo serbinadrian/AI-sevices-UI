@@ -91,7 +91,7 @@ qa_naint_QA.Question.prototype.toObject = function(opt_includeInstance) {
  */
 qa_naint_QA.Question.toObject = function(includeInstance, msg) {
   var f, obj = {
-    question: jspb.Message.getFieldWithDefault(msg, 1, "")
+    question: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
@@ -128,7 +128,7 @@ qa_naint_QA.Question.deserializeBinaryFromReader = function(msg, reader) {
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
+    case 2:
       var value = /** @type {string} */ (reader.readString());
       msg.setQuestion(value);
       break;
@@ -164,7 +164,7 @@ qa_naint_QA.Question.serializeBinaryToWriter = function(message, writer) {
   f = message.getQuestion();
   if (f.length > 0) {
     writer.writeString(
-      1,
+      2,
       f
     );
   }
@@ -172,11 +172,11 @@ qa_naint_QA.Question.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * optional string question = 1;
+ * optional string question = 2;
  * @return {string}
  */
 qa_naint_QA.Question.prototype.getQuestion = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
 
@@ -185,7 +185,7 @@ qa_naint_QA.Question.prototype.getQuestion = function() {
  * @return {!qa_naint_QA.Question} returns this
  */
 qa_naint_QA.Question.prototype.setQuestion = function(value) {
-  return jspb.Message.setProto3StringField(this, 1, value);
+  return jspb.Message.setProto3StringField(this, 2, value);
 };
 
 

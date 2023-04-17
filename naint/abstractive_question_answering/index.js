@@ -48,7 +48,6 @@ class AbstractiveQuestionAnswering extends React.Component {
 
   parseResponse(response) {
     const { message, status, statusMessage } = response;
-
     if (!this.isOk(status)) {
       throw new Error(statusMessage);
     }
@@ -59,15 +58,16 @@ class AbstractiveQuestionAnswering extends React.Component {
 
   submitAction() {
     const { question } = this.state;
-    const { methods } = metadata.configuration;
+    const { service } = metadata.configuration;
 
-    const methodDescriptor = QA[methods.abstractiveQestionAnswering];
+    const methodDescriptor = QA[service.method];
     const request = new methodDescriptor.requestType();
 
     request.setQuestion(question);
+    
     const props = {
       request,
-      onEnd: response => this.parseResponse
+      onEnd: response => this.parseResponse(response)
     };
     this.props.serviceClient.unary(methodDescriptor, props);
   }
