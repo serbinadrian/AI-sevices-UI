@@ -1,7 +1,7 @@
 // package: qa
-// file: qa.proto
+// file: abstractive_question_answering.proto
 
-var qa_pb = require("./qa_pb");
+var abstractive_question_answering_pb = require("./abstractive_question_answering_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
 var QA = (function () {
@@ -15,8 +15,8 @@ QA.qa = {
   service: QA,
   requestStream: false,
   responseStream: false,
-  requestType: qa_pb.Question,
-  responseType: qa_pb.Answer
+  requestType: abstractive_question_answering_pb.Question,
+  responseType: abstractive_question_answering_pb.Answer
 };
 
 exports.QA = QA;
