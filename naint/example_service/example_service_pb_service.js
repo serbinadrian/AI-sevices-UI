@@ -1,36 +1,36 @@
-// package: qa
-// file: qa.proto
+// package: example_service
+// file: example_service.proto
 
-var qa_pb = require("./qa_pb");
+var example_service_pb = require("./example_service_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
-var QA = (function () {
-  function QA() {}
-  QA.serviceName = "qa.QA";
-  return QA;
+var example_service = (function () {
+  function example_service() {}
+  example_service.serviceName = "example_service.example_service";
+  return example_service;
 }());
 
-QA.qa = {
-  methodName: "qa",
-  service: QA,
+example_service.example_service = {
+  methodName: "example_service",
+  service: example_service,
   requestStream: false,
   responseStream: false,
-  requestType: qa_pb.Question,
-  responseType: qa_pb.Answer
+  requestType: example_service_pb.Query,
+  responseType: example_service_pb.Answer
 };
 
-exports.QA = QA;
+exports.example_service = example_service;
 
-function QAClient(serviceHost, options) {
+function example_serviceClient(serviceHost, options) {
   this.serviceHost = serviceHost;
   this.options = options || {};
 }
 
-QAClient.prototype.qa = function qa(requestMessage, metadata, callback) {
+example_serviceClient.prototype.example_service = function example_service(requestMessage, metadata, callback) {
   if (arguments.length === 2) {
     callback = arguments[1];
   }
-  var client = grpc.unary(QA.qa, {
+  var client = grpc.unary(example_service.example_service, {
     request: requestMessage,
     host: this.serviceHost,
     metadata: metadata,
@@ -57,5 +57,5 @@ QAClient.prototype.qa = function qa(requestMessage, metadata, callback) {
   };
 };
 
-exports.QAClient = QAClient;
+exports.example_serviceClient = example_serviceClient;
 
