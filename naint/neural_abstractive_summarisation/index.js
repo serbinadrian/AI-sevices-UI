@@ -5,7 +5,7 @@ import Button from "@material-ui/core/Button";
 import SvgIcon from "@material-ui/core/SvgIcon";
 import HoverIcon from "../../standardComponents/HoverIcon";
 import AlertBox, { alertTypes } from "../../../../components/common/AlertBox";
-import { neural_summarisation } from "./summary_pb_service";
+import { neural_summarisation } from "./neural_abstractive_summarisation_pb_service";
 import { MODEL, BLOCKS, LABELS } from "./metadata";
 import { useStyles } from "./styles";
 import { withStyles } from "@material-ui/styles";
@@ -38,11 +38,13 @@ class NeuralAbstractiveSummarisation extends React.Component {
 
   getErrorMessageByKey(errorKey) {
     const { errors } = LABELS;
+
     return errors[errorKey];
   }
 
   getValidationMeta() {
     const errorKey = valueRestrictions.ONLY_LATINS_REGEX.errorKey;
+
     return {
       regex: onlyLatinsRegex,
       errorKey: errorKey,
@@ -56,6 +58,7 @@ class NeuralAbstractiveSummarisation extends React.Component {
   validateInput(targetValue) {
     const { errors } = this.state.status;
     const { regex, errorKey } = this.getValidationMeta();
+    
     let isAllRequirementsMet = true;
 
     if (!this.isValidInput(regex, targetValue)) {
@@ -155,6 +158,10 @@ class NeuralAbstractiveSummarisation extends React.Component {
         outlinedTextAreaAdditionalProps.ON_CHANGE
       ] = this[handleFunctionKey];
     }
+    if (rangeRestrictions[meta.rangeRestrictionKey].max) {
+      InputHandlerConfiguration[outlinedTextAreaAdditionalProps.CHAR_LIMIT] =
+        rangeRestrictions[meta.rangeRestrictionKey].max;
+    }
     return InputHandlerConfiguration;
   }
 
@@ -166,7 +173,6 @@ class NeuralAbstractiveSummarisation extends React.Component {
     if (meta.edit) {
       InputHandlerConfiguration = this.createHandleConfiguration(meta);
     }
-    console.log("meta: ", meta.rangeRestrictionKey);
 
     return (
       <Grid item xs={12} container justify="center">
@@ -177,7 +183,6 @@ class NeuralAbstractiveSummarisation extends React.Component {
           rows={meta.rows}
           label={labels[meta.labelKey]}
           value={this.state[meta.stateKey]}
-          charLimit={rangeRestrictions[meta.rangeRestrictionKey].max}
           {...InputHandlerConfiguration}
         />
       </Grid>

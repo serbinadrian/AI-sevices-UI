@@ -1,9 +1,8 @@
 export const MODEL = {
   informationLinks: {
-    GIT_HUB: "https://github.com/iktina/neural-abstractive-summarization",
-    USER_GUIDE: "https://github.com/iktina/neural-abstractive-summarization",
-    ORIGINAL_PROJECT:
-      "https://github.com/iktina/neural-abstractive-summarization",
+    GIT_HUB: "https://github.com/iktina/hate-speech-detection",
+    USER_GUIDE: "https://github.com/iktina/hate-speech-detection",
+    ORIGINAL_PROJECT: "https://github.com/iktina/hate-speech-detection",
   },
   state: {
     response: undefined,
@@ -28,7 +27,7 @@ export const MODEL = {
     },
   },
   service: {
-    METHOD: "neural_summarisation",
+    METHOD: "detection",
   },
 };
 
@@ -49,11 +48,8 @@ export const BLOCKS = {
   },
   outputBlocks: {
     SERVICE_OUTPUT: {
-      type: "text-area",
-      id: "service-response",
+      type: "block-set",
       name: "service-response",
-      rows: 5,
-      edit: false,
       stateKey: "response",
       labelKey: "SERVICE_OUTPUT",
     },
@@ -93,7 +89,7 @@ const { rangeRestrictions } = MODEL.restrictions;
 export const LABELS = {
   labels: {
     CHARS: "characters",
-    TEXT_INPUT: "Text to summarise",
+    TEXT_INPUT: "Text to process:",
     SERVICE_OUTPUT: "Result is",
     VIEW_CODE: "View code on Github",
     USER_GUIDE: "User's guide",

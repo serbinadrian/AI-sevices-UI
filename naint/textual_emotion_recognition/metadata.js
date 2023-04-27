@@ -1,9 +1,8 @@
 export const MODEL = {
   informationLinks: {
-    GIT_HUB: "https://github.com/iktina/neural-abstractive-summarization",
-    USER_GUIDE: "https://github.com/iktina/neural-abstractive-summarization",
-    ORIGINAL_PROJECT:
-      "https://github.com/iktina/neural-abstractive-summarization",
+    GIT_HUB: "https://github.com/iktina/textual-emotion-recognition",
+    USER_GUIDE: "https://github.com/iktina/textual-emotion-recognition",
+    ORIGINAL_PROJECT: "https://github.com/iktina/textual-emotion-recognition",
   },
   state: {
     response: undefined,
@@ -28,7 +27,7 @@ export const MODEL = {
     },
   },
   service: {
-    METHOD: "neural_summarisation",
+    METHOD: "recognize",
   },
 };
 
@@ -38,7 +37,7 @@ export const BLOCKS = {
       type: "text-area",
       id: "text-input",
       name: "textInputValue",
-      rows: 5,
+      rows: 7,
       edit: true,
       stateKey: "textInputValue",
       handleFunctionKey: "handleTextInput",
@@ -49,11 +48,8 @@ export const BLOCKS = {
   },
   outputBlocks: {
     SERVICE_OUTPUT: {
-      type: "text-area",
-      id: "service-response",
+      type: "block-set",
       name: "service-response",
-      rows: 5,
-      edit: false,
       stateKey: "response",
       labelKey: "SERVICE_OUTPUT",
     },
@@ -61,7 +57,7 @@ export const BLOCKS = {
       type: "text-area",
       id: "textInput",
       name: "textInput",
-      rows: 5,
+      rows: 7,
       edit: false,
       stateKey: "textInputValue",
       labelKey: "TEXT_INPUT",
@@ -93,8 +89,8 @@ const { rangeRestrictions } = MODEL.restrictions;
 export const LABELS = {
   labels: {
     CHARS: "characters",
-    TEXT_INPUT: "Text to summarise",
-    SERVICE_OUTPUT: "Result is",
+    TEXT_INPUT: "Text to process",
+    SERVICE_OUTPUT: "Result is:",
     VIEW_CODE: "View code on Github",
     USER_GUIDE: "User's guide",
     ORIGINAL_PROJECT: "View original project",
@@ -104,6 +100,6 @@ export const LABELS = {
     NO_RESPONSE: "Something went wrong...",
   },
   errors: {
-    ONLY_LATINS_REGEX_ERROR: `The input text must be written in English only! No more than ${rangeRestrictions.ONLY_LATINS_TEXT_LENGTH.max} characters`,
+    ONLY_LATINS_REGEX_ERROR: `The input text must be written in English! No more than ${rangeRestrictions.ONLY_LATINS_TEXT_LENGTH.max} characters`,
   },
 };
