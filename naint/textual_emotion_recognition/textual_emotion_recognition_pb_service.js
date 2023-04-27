@@ -1,36 +1,36 @@
-// package: hsd
-// file: HSD.proto
+// package: textual_emotion_recognition
+// file: textual_emotion_recognition.proto
 
-var HSD_pb = require("./HSD_pb");
+var textual_emotion_recognition_pb = require("./textual_emotion_recognition_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
-var HSD = (function () {
-  function HSD() {}
-  HSD.serviceName = "hsd.HSD";
-  return HSD;
+var TER = (function () {
+  function TER() {}
+  TER.serviceName = "textual_emotion_recognition.TER";
+  return TER;
 }());
 
-HSD.detection = {
-  methodName: "detection",
-  service: HSD,
+TER.recognize = {
+  methodName: "recognize",
+  service: TER,
   requestStream: false,
   responseStream: false,
-  requestType: HSD_pb.Input,
-  responseType: HSD_pb.Output
+  requestType: textual_emotion_recognition_pb.Input,
+  responseType: textual_emotion_recognition_pb.Output
 };
 
-exports.HSD = HSD;
+exports.TER = TER;
 
-function HSDClient(serviceHost, options) {
+function TERClient(serviceHost, options) {
   this.serviceHost = serviceHost;
   this.options = options || {};
 }
 
-HSDClient.prototype.detection = function detection(requestMessage, metadata, callback) {
+TERClient.prototype.recognize = function recognize(requestMessage, metadata, callback) {
   if (arguments.length === 2) {
     callback = arguments[1];
   }
-  var client = grpc.unary(HSD.detection, {
+  var client = grpc.unary(TER.recognize, {
     request: requestMessage,
     host: this.serviceHost,
     metadata: metadata,
@@ -57,5 +57,5 @@ HSDClient.prototype.detection = function detection(requestMessage, metadata, cal
   };
 };
 
-exports.HSDClient = HSDClient;
+exports.TERClient = TERClient;
 

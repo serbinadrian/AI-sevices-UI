@@ -1,36 +1,36 @@
-// package: textual_emotion_recognition
-// file: ter.proto
+// package: hsd
+// file: hate_speech_detection.proto
 
-var ter_pb = require("./ter_pb");
+var hate_speech_detection_pb = require("./hate_speech_detection_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
-var TER = (function () {
-  function TER() {}
-  TER.serviceName = "textual_emotion_recognition.TER";
-  return TER;
+var HSD = (function () {
+  function HSD() {}
+  HSD.serviceName = "hsd.HSD";
+  return HSD;
 }());
 
-TER.recognize = {
-  methodName: "recognize",
-  service: TER,
+HSD.detection = {
+  methodName: "detection",
+  service: HSD,
   requestStream: false,
   responseStream: false,
-  requestType: ter_pb.Input,
-  responseType: ter_pb.Output
+  requestType: hate_speech_detection_pb.Input,
+  responseType: hate_speech_detection_pb.Output
 };
 
-exports.TER = TER;
+exports.HSD = HSD;
 
-function TERClient(serviceHost, options) {
+function HSDClient(serviceHost, options) {
   this.serviceHost = serviceHost;
   this.options = options || {};
 }
 
-TERClient.prototype.recognize = function recognize(requestMessage, metadata, callback) {
+HSDClient.prototype.detection = function detection(requestMessage, metadata, callback) {
   if (arguments.length === 2) {
     callback = arguments[1];
   }
-  var client = grpc.unary(TER.recognize, {
+  var client = grpc.unary(HSD.detection, {
     request: requestMessage,
     host: this.serviceHost,
     metadata: metadata,
@@ -57,5 +57,5 @@ TERClient.prototype.recognize = function recognize(requestMessage, metadata, cal
   };
 };
 
-exports.TERClient = TERClient;
+exports.HSDClient = HSDClient;
 
