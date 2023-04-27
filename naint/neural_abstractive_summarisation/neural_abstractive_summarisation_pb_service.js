@@ -1,7 +1,7 @@
 // package: neural_summarisation
-// file: summary.proto
+// file: neural_abstractive_summarisation.proto
 
-var summary_pb = require("./summary_pb");
+var neural_abstractive_summarisation_pb = require("./neural_abstractive_summarisation_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
 var neural_summarisation = (function () {
@@ -15,8 +15,8 @@ neural_summarisation.neural_summarisation = {
   service: neural_summarisation,
   requestStream: false,
   responseStream: false,
-  requestType: summary_pb.Query,
-  responseType: summary_pb.Answer
+  requestType: neural_abstractive_summarisation_pb.Query,
+  responseType: neural_abstractive_summarisation_pb.Answer
 };
 
 exports.neural_summarisation = neural_summarisation;

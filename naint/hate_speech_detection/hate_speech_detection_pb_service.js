@@ -1,7 +1,7 @@
 // package: hsd
-// file: HSD.proto
+// file: hate_speech_detection.proto
 
-var HSD_pb = require("./HSD_pb");
+var hate_speech_detection_pb = require("./hate_speech_detection_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
 var HSD = (function () {
@@ -15,8 +15,8 @@ HSD.detection = {
   service: HSD,
   requestStream: false,
   responseStream: false,
-  requestType: HSD_pb.Input,
-  responseType: HSD_pb.Output
+  requestType: hate_speech_detection_pb.Input,
+  responseType: hate_speech_detection_pb.Output
 };
 
 exports.HSD = HSD;

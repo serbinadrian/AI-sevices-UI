@@ -1,36 +1,36 @@
-// package: textual_emotion_recognition
-// file: ter.proto
+// package: example_service
+// file: example_service.proto
 
-var ter_pb = require("./ter_pb");
+var example_service_pb = require("./example_service_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
-var TER = (function () {
-  function TER() {}
-  TER.serviceName = "textual_emotion_recognition.TER";
-  return TER;
+var example_service = (function () {
+  function example_service() {}
+  example_service.serviceName = "example_service.example_service";
+  return example_service;
 }());
 
-TER.recognize = {
-  methodName: "recognize",
-  service: TER,
+example_service.example_service = {
+  methodName: "example_service",
+  service: example_service,
   requestStream: false,
   responseStream: false,
-  requestType: ter_pb.Input,
-  responseType: ter_pb.Output
+  requestType: example_service_pb.Query,
+  responseType: example_service_pb.Answer
 };
 
-exports.TER = TER;
+exports.example_service = example_service;
 
-function TERClient(serviceHost, options) {
+function example_serviceClient(serviceHost, options) {
   this.serviceHost = serviceHost;
   this.options = options || {};
 }
 
-TERClient.prototype.recognize = function recognize(requestMessage, metadata, callback) {
+example_serviceClient.prototype.example_service = function example_service(requestMessage, metadata, callback) {
   if (arguments.length === 2) {
     callback = arguments[1];
   }
-  var client = grpc.unary(TER.recognize, {
+  var client = grpc.unary(example_service.example_service, {
     request: requestMessage,
     host: this.serviceHost,
     metadata: metadata,
@@ -57,5 +57,5 @@ TERClient.prototype.recognize = function recognize(requestMessage, metadata, cal
   };
 };
 
-exports.TERClient = TERClient;
+exports.example_serviceClient = example_serviceClient;
 
