@@ -21,6 +21,7 @@ const SPACED_SLASH = " / ";
 const outlinedTextAreaAdditionalProps = {
   HELPER: "helperTxt",
   ON_CHANGE: "onChange",
+  CHAR_LIMIT: "charLimit",
 };
 
 class NeuralAbstractiveSummarisation extends React.Component {
@@ -58,7 +59,7 @@ class NeuralAbstractiveSummarisation extends React.Component {
   validateInput(targetValue) {
     const { errors } = this.state.status;
     const { regex, errorKey } = this.getValidationMeta();
-    
+
     let isAllRequirementsMet = true;
 
     if (!this.isValidInput(regex, targetValue)) {
