@@ -22,6 +22,7 @@ const keysToDelete = { TEXT: "text" };
 const outlinedTextAreaAdditionalProps = {
   HELPER: "helperTxt",
   ON_CHANGE: "onChange",
+  CHAR_LIMIT: "charLimit",
 };
 
 class HateSpeechDetection extends React.Component {
@@ -206,9 +207,10 @@ class HateSpeechDetection extends React.Component {
     return (
       <Grid
         className={classes.outputLine}
+        item
         xs={12}
         container
-        justify="start"
+        justify="flex-start"
         key={outputKey}
       >
         <Grid className={classes.responseCategory} item xs={3}>
@@ -228,7 +230,7 @@ class HateSpeechDetection extends React.Component {
     const outputKeysArray = Object.keys(response);
 
     return (
-      <Grid item xs={12} container justify="start">
+      <Grid item xs={12} container justify="flex-start">
         <span className={classes.outputLabel}>{labels.SERVICE_OUTPUT}</span>
         {outputKeysArray.map((outputKey) => this.renderOutputLine(outputKey))}
       </Grid>
