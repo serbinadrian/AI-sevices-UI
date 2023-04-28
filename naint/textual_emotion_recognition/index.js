@@ -204,9 +204,10 @@ class TextualEmotionsRecognition extends React.Component {
     return (
       <Grid
         className={classes.outputLine}
+        item
         xs={12}
         container
-        justify="start"
+        justify="flex-start"
         key={outputKey}
       >
         <Grid className={classes.responseCategory} item xs={3}>
@@ -226,7 +227,7 @@ class TextualEmotionsRecognition extends React.Component {
     const outputKeysArray = Object.keys(response);
 
     return (
-      <Grid item xs={12} container justify="start">
+      <Grid item xs={12} container justify="flex-start">
         <span className={classes.outputLabel}>{labels.SERVICE_OUTPUT}</span>
         {outputKeysArray.map((outputKey) => this.renderOutputLine(outputKey))}
       </Grid>
