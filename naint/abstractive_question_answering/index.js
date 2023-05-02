@@ -201,7 +201,7 @@ class AbstractiveQuestionAnswering extends React.Component {
         container
         justify="flex-start"
       >
-        <Grid item xs={9}>
+        <Grid item xs={12}>
           {response}
         </Grid>
       </Grid>
