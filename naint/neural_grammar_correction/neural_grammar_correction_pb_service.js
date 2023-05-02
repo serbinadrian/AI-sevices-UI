@@ -1,7 +1,7 @@
 // package: neural_grammar_correction
-// file: ngc.proto
+// file: neural_grammar_correction.proto
 
-var ngc_pb = require("./ngc_pb");
+var neural_grammar_correction_pb = require("./neural_grammar_correction_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
 var Corrector = (function () {
@@ -15,8 +15,8 @@ Corrector.correct = {
   service: Corrector,
   requestStream: false,
   responseStream: false,
-  requestType: ngc_pb.Input,
-  responseType: ngc_pb.Output
+  requestType: neural_grammar_correction_pb.Input,
+  responseType: neural_grammar_correction_pb.Output
 };
 
 exports.Corrector = Corrector;
@@ -58,4 +58,3 @@ CorrectorClient.prototype.correct = function correct(requestMessage, metadata, c
 };
 
 exports.CorrectorClient = CorrectorClient;
-
