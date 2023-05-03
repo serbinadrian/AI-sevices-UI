@@ -90,7 +90,7 @@ export const LABELS = {
   labels: {
     CHARS: "characters",
     TEXT_INPUT: "Text to process:",
-    SERVICE_OUTPUT: "Result is",
+    SERVICE_OUTPUT: "Result:",
     VIEW_CODE: "View code on Github",
     USER_GUIDE: "User's guide",
     ORIGINAL_PROJECT: "View original project",

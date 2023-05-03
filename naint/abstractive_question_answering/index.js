@@ -1,109 +1,181 @@
 import React from "react";
 import Grid from "@material-ui/core/Grid";
+import OutlinedTextArea from "../../common/OutlinedTextArea";
 import Button from "@material-ui/core/Button";
 import SvgIcon from "@material-ui/core/SvgIcon";
-import { metadata } from "./metadata";
 import HoverIcon from "../../standardComponents/HoverIcon";
-import OutlinedTextArea from "../../common/OutlinedTextArea";
+import AlertBox, { alertTypes } from "../../../../components/common/AlertBox";
 import { QA } from "./abstractive_question_answering_pb_service";
+import { MODEL, BLOCKS, LABELS } from "./metadata";
 import { useStyles } from "./styles";
 import { withStyles } from "@material-ui/styles";
 
+const { rangeRestrictions, valueRestrictions } = MODEL.restrictions;
+const onlyLatinsRegex = new RegExp(valueRestrictions.ONLY_LATINS_REGEX.value);
+
+const EMPTY_STRING = "";
+const OK_CODE = 0;
+const SPACE = " ";
+const SPACED_SLASH = " / ";
+
+const outlinedTextAreaAdditionalProps = {
+  HELPER: "helperTxt",
+  ON_CHANGE: "onChange",
+  CHAR_LIMIT: "charLimit",
+};
+
 class AbstractiveQuestionAnswering extends React.Component {
   constructor(props) {
-    const { state } = metadata.configuration;
-    const { restrictions } = metadata.configuration
+    const { state } = MODEL;
     super(props);
-    this.state = state;
     this.submitAction = this.submitAction.bind(this);
     this.handleTextInput = this.handleTextInput.bind(this);
-    this.inputHelperTextFunction = this.inputHelperTextFunction.bind(this);
-    this.state.regex = new RegExp('^\\W*(?:\\w+\\b\\W*){' + restrictions.wordsMinimumCount + ',' + restrictions.wordsLimit + '}$');
+    this.inputMaxLengthHelperFunction = this.inputMaxLengthHelperFunction.bind(
+      this
+    );
+    this.state = state;
   }
 
-  wordCount(string) {
-    return string
-      .replace(/(\r\n|\n|\r)/gm, " ")
-      .split(' ')
-      .filter(character => character !== '' )
-      .length;
+  getErrorMessageByKey(errorKey) {
+    const { errors } = LABELS;
+
+    return errors[errorKey];
   }
 
-  handleTextInput(event) {
-    let data = event.target.value
+  getValidationMeta() {
+    const errorKey = valueRestrictions.ONLY_LATINS_REGEX.errorKey;
+
+    return {
+      regex: onlyLatinsRegex,
+      errorKey: errorKey,
+    };
+  }
+
+  isValidInput(regex, text) {
+    return regex.exec(text);
+  }
+
+  validateInput(targetValue) {
+    const { errors } = this.state.status;
+    const { regex, errorKey } = this.getValidationMeta();
+
+    let isAllRequirementsMet = true;
+
+    if (!this.isValidInput(regex, targetValue)) {
+      const errorMessage = this.getErrorMessageByKey(errorKey);
+      errors.set(errorKey, errorMessage);
+    } else {
+      errors.delete(errorKey);
+    }
+
+    if (errors.size > 0) {
+      isAllRequirementsMet = false;
+    }
+
     this.setState({
-      [event.target.name]: data,
-      wordsCount: this.wordCount(data)
+      status: {
+        errors: errors,
+        isAllRequirementsMet: isAllRequirementsMet,
+      },
     });
   }
-  
+
   canBeInvoked() {
-    const { regex, question } = this.state;
-    return regex.exec(question);
+    const { status, textInputValue } = this.state;
+    const { isAllRequirementsMet } = status;
+
+    return isAllRequirementsMet && textInputValue !== EMPTY_STRING;
   }
 
   isOk(status) {
-    return status === 0;
+    return status === OK_CODE;
+  }
+
+  handleTextInput(event) {
+    const targetName = event.target.name;
+    const targetValue = event.target.value;
+
+    this.validateInput(targetValue);
+
+    this.setState({
+      [targetName]: targetValue,
+    });
   }
 
   parseResponse(response) {
     const { message, status, statusMessage } = response;
+
     if (!this.isOk(status)) {
       throw new Error(statusMessage);
     }
+
     this.setState({
       response: message.getAnswer()
     });
   }
 
   submitAction() {
-    const { question } = this.state;
-    const { service } = metadata.configuration;
+    const { textInputValue } = this.state;
+    const { service } = MODEL;
 
-    const methodDescriptor = QA[service.method];
+    const methodDescriptor = QA[service.METHOD];
     const request = new methodDescriptor.requestType();
 
-    request.setQuestion(question);
-    
+    request.setQuestion(textInputValue);
+
     const props = {
       request,
-      onEnd: response => this.parseResponse(response)
+      onEnd: (response) => this.parseResponse(response),
     };
     this.props.serviceClient.unary(methodDescriptor, props);
   }
 
-  inputHelperTextFunction() {
-    const { wordsCount } = this.state;
-    const { wordsLimit } = metadata.configuration.restrictions;
-    const { labels } = metadata.render;
-    
-    return wordsCount + " / " + wordsLimit + " " + labels.words;
-  };
+  inputMaxLengthHelperFunction(textLengthValue, restrictionKey) {
+    const { labels } = LABELS;
 
-  createHandleConfiguration(meta){
-    const {handleKey, helperKey} = meta;   
-    let InputHandlerConfiguration = {};    
-    if (this[helperKey]) {
+    return (
+      textLengthValue +
+      SPACED_SLASH +
+      rangeRestrictions[restrictionKey].max +
+      SPACE +
+      labels.CHARS
+    );
+  }
+
+  createHandleConfiguration(meta) {
+    const { handleFunctionKey, helperFunctionKey, rangeRestrictionKey } = meta;
+
+    let InputHandlerConfiguration = {};
+
+    if (this[helperFunctionKey]) {
       //helper is const string for single render and it have to be constructed before used -> call()
-      InputHandlerConfiguration["helperTxt"] = this[helperKey].call();
+      InputHandlerConfiguration[outlinedTextAreaAdditionalProps.HELPER] = this[
+        helperFunctionKey
+      ].call(this, this.state[meta.stateKey].length, rangeRestrictionKey);
     }
-    if (this[handleKey]) {
-      InputHandlerConfiguration["onChange"] = this[handleKey];
+    if (this[handleFunctionKey]) {
+      InputHandlerConfiguration[
+        outlinedTextAreaAdditionalProps.ON_CHANGE
+      ] = this[handleFunctionKey];
     }
-    return InputHandlerConfiguration ?? [];
+    if (rangeRestrictions[meta.rangeRestrictionKey].max) {
+      InputHandlerConfiguration[outlinedTextAreaAdditionalProps.CHAR_LIMIT] =
+        rangeRestrictions[meta.rangeRestrictionKey].max;
+    }
+    return InputHandlerConfiguration;
   }
 
   renderTextArea(meta) {
-    const { classes } = this.props;
-    const { labels } = metadata.render;
-    
+    const { labels } = LABELS;
+
     let InputHandlerConfiguration = [];
-    if(meta.edit){
+
+    if (meta.edit) {
       InputHandlerConfiguration = this.createHandleConfiguration(meta);
     }
 
     return (
-      <Grid className={classes.textArea}>
+      <Grid item xs={12} container justify="center">
         <OutlinedTextArea
           fullWidth={true}
           id={meta.id}
@@ -117,17 +189,52 @@ class AbstractiveQuestionAnswering extends React.Component {
     );
   }
 
+  renderOutputLine() {
+    const { classes } = this.props;
+    const { response } = this.state;
+
+    return (
+      <Grid
+        className={classes.outputLine}
+        item
+        xs={12}
+        container
+        justify="flex-start"
+      >
+        <Grid item xs={12}>
+          {response}
+        </Grid>
+      </Grid>
+    );
+  }
+
+  renderOutputBlockSet() {
+    const { labels } = LABELS;
+    const { classes } = this.props;
+
+    return (
+      <Grid item xs={12} container justify="flex-start">
+        <span className={classes.outputLabel}>{labels.SERVICE_OUTPUT}</span>
+        {this.renderOutputLine()}
+      </Grid>
+    );
+  }
+
   renderInfoBlock() {
-    const { informationLinks } = this.state;
-    const { information } = metadata.render.blocks;
-    const { labels } = metadata.render;
-    const links = Object.values(information);
+    const { informationLinks } = MODEL;
+    const { informationBlocks } = BLOCKS;
+    const { labels } = LABELS;
+
+    const links = Object.values(informationBlocks);
 
     return (
       <Grid item xs container justify="flex-end">
-        {links.map(link => (
-          <Grid item key={link}>
-            <HoverIcon text={labels[link.labelKey]} href={informationLinks[link.linkKey]}>
+        {links.map((link) => (
+          <Grid item key={link.linkKey}>
+            <HoverIcon
+              text={labels[link.labelKey]}
+              href={informationLinks[link.linkKey]}
+            >
               <SvgIcon>
                 <path d={link.svgPath} />
               </SvgIcon>
@@ -140,7 +247,7 @@ class AbstractiveQuestionAnswering extends React.Component {
 
   renderInvokeButton() {
     const { classes } = this.props;
-    const { labels } = metadata.render;
+    const { labels } = LABELS;
 
     return (
       <Grid item xs={12} className={classes.invokeButton}>
@@ -150,41 +257,57 @@ class AbstractiveQuestionAnswering extends React.Component {
           onClick={this.submitAction}
           disabled={!this.canBeInvoked()}
         >
-          {labels.invokeButton}
+          {labels.INVOKE_BUTTON}
         </Button>
       </Grid>
     );
   }
 
-  renderServiceInput() {
-    const { input } = metadata.render.blocks;
+  renderValidationStatusBlocks(errors) {
+    const { classes } = this.props;
+
+    const errorKeysArray = Array.from(errors.keys());
 
     return (
+      <Grid item xs={12} container className={classes.alertsContainer}>
+        {errorKeysArray.map((arrayErrorKey) => (
+          <AlertBox
+            type={alertTypes.ERROR}
+            message={errors.get(arrayErrorKey)}
+            className={classes.alertMessage}
+            key={arrayErrorKey}
+          />
+        ))}
+      </Grid>
+    );
+  }
+
+  renderServiceInput() {
+    const { inputBlocks } = BLOCKS;
+    const { errors } = this.state.status;
+    return (
       <Grid container direction="column" justify="center">
-        {this.renderTextArea(input.question)}
+        {this.renderTextArea(inputBlocks.TEXT_INPUT)}
         {this.renderInfoBlock()}
         {this.renderInvokeButton()}
+        {errors.size ? this.renderValidationStatusBlocks(errors) : null}
       </Grid>
     );
   }
 
   renderServiceOutput() {
     const { response } = this.state;
-    const { output } = metadata.render.blocks;
-    const { labels } = metadata.render;
+    const { outputBlocks } = BLOCKS;
+    const { status } = LABELS;
 
     if (!response) {
-      return (
-        <h4>
-          {labels.noResponse}
-        </h4>
-      );
+      return <h4>{status.NO_RESPONSE}</h4>;
     }
 
     return (
       <Grid container direction="column" justify="center">
-        {this.renderTextArea(output.userInput)}
-        {this.renderTextArea(output.serviceOutput)}
+        {this.renderTextArea(outputBlocks.USER_TEXT_INPUT)}
+        {this.renderOutputBlockSet()}
         {this.renderInfoBlock()}
       </Grid>
     );
