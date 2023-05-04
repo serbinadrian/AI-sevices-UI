@@ -1,7 +1,7 @@
 // package: pcr
-// file: PCR.proto
+// file: punctuation_capitalisation_restoration.proto
 
-var PCR_pb = require("./PCR_pb");
+var punctuation_capitalisation_restoration_pb = require("./punctuation_capitalisation_restoration_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
 var PCR = (function () {
@@ -15,8 +15,8 @@ PCR.t2t = {
   service: PCR,
   requestStream: false,
   responseStream: false,
-  requestType: PCR_pb.Query,
-  responseType: PCR_pb.Text
+  requestType: punctuation_capitalisation_restoration_pb.Query,
+  responseType: punctuation_capitalisation_restoration_pb.Text
 };
 
 exports.PCR = PCR;
