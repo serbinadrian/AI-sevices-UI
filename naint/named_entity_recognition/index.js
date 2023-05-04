@@ -1,314 +1,373 @@
 import React from "react";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
-import {RecognizeMessage} from "./named_entity_recognition_rpc_pb_service";
-import OutlinedDropDown from "../../common/OutlinedDropdown";
 import OutlinedTextArea from "../../common/OutlinedTextArea";
-import OutlinedLabel from "../../common/OutlinedLabel";
-import parse from 'html-react-parser';
+import SvgIcon from "@material-ui/core/SvgIcon";
+import HoverIcon from "../../standardComponents/HoverIcon";
+import AlertBox, { alertTypes } from "../../../../components/common/AlertBox";
+import { RecognizeMessage } from "./named_entity_recognition_pb_service";
+import { MODEL, BLOCKS, LABELS } from "./metadata";
+import { useStyles } from "./styles";
+import { withStyles } from "@material-ui/styles";
 
-export default class NamedEntityRecognitionService extends React.Component {
+const { rangeRestrictions, valueRestrictions } = MODEL.restrictions;
+const onlyLatinsRegex = new RegExp(valueRestrictions.ONLY_LATINS_REGEX.value);
+
+const EMPTY_STRING = "";
+const OK_CODE = 0;
+const SPACE = " ";
+const SPACED_SLASH = " / ";
+const DASH = " - ";
+
+const outlinedTextAreaAdditionalProps = {
+  HELPER: "helperTxt",
+  ON_CHANGE: "onChange",
+  CHAR_LIMIT: "charLimit",
+};
+
+const responseFields = {
+  NAME: "name",
+  TYPE: "type",
+  START_SPAN: "start_span",
+  END_SPAN: "end_span",
+};
+
+class NamedEntityRecognitionService extends React.Component {
   constructor(props) {
+    const { state } = MODEL;
     super(props);
     this.submitAction = this.submitAction.bind(this);
-    this.handleFormUpdate = this.handleFormUpdate.bind(this);
-    this.handleParameterChange = this.handleParameterChange.bind(this);
-    this.handleInputText = this.handleInputText.bind(this);
+    this.handleTextInput = this.handleTextInput.bind(this);
+    this.inputMaxLengthHelperFunction = this.inputMaxLengthHelperFunction.bind(
+      this
+    );
 
-    this.textInput = React.createRef();
+    this.state = state;
+  }
 
-    this.state = {
-      selectedExample: 0,
-      exampleList: [
-        {
-          label: "Custom text",
-          value: 0,
-          content: "",
-        },
-        {
-          label: "Example 1",
-          value: 1,
-          content: "Our concept of operations is to flow in our military assets with a priority to build up southern " +
-            "Texas, and then Arizona, and then California, Donald Trump said Monday, adding that the soldiers normally " +
-            "assigned weapons will be carrying them at the border.  We'll reinforce along priority points of entry, and " +
-            "while this happens, Trump Hotels is falling down in stock market.",
-        },
-      ],
-      serviceName: "RecognizeMessage",
-      methodName: "Recognize",
-      message: "",
-      response: undefined,
-      reqStart: undefined,
+  getErrorMessageByKey(errorKey) {
+    const { errors } = LABELS;
+    return errors[errorKey];
+  }
+
+  getValidationMeta() {
+    const errorKey = valueRestrictions.ONLY_LATINS_REGEX.errorKey;
+    return {
+      regex: onlyLatinsRegex,
+      errorKey: errorKey,
     };
   }
 
-  handleFormUpdate(event) {
-    this.setState({ [event.target.name]: event.target.value });
-  };
+  isValidInput(regex, text) {
+    return regex.exec(text);
+  }
 
-  handleParameterChange(event) {
+  validateInput(targetValue) {
+    const { errors } = this.state.status;
+    const { regex, errorKey } = this.getValidationMeta();
+    let isAllRequirementsMet = true;
+
+    if (!this.isValidInput(regex, targetValue)) {
+      const errorMessage = this.getErrorMessageByKey(errorKey);
+      errors.set(errorKey, errorMessage);
+    } else {
+      errors.delete(errorKey);
+    }
+
+    if (errors.size > 0) {
+      isAllRequirementsMet = false;
+    }
+
     this.setState({
-      selectedExample: event.target.value,
-    }, () => {
-      if (this.state.selectedExample !== "default") {
-        this.state.exampleList.forEach(item => {
-          if (item.value == event.target.value) {
-            this.setState({ message: item.content }, () => {
-                this.textInput.current.inputRef.current.focus();
-              },
-            );
-          }
-        });
-      }
+      status: {
+        errors: errors,
+        isAllRequirementsMet: isAllRequirementsMet,
+      },
     });
-  }
-
-  handleInputText(event) {
-    this.setState({ [event.target.name]: event.target.value });
-  }
-
-  handleSentences() {
-    let tempMessages = this.state.message.toString().split("\n");
-    let tempArray = [];
-    for (let i = 0; i < tempMessages.length; i++) {
-      if (tempMessages[i].length >= 1) {
-        tempArray.push(tempMessages[i]);
-      }
-    }
-    let filterArray = tempArray.filter(function(el) {
-      return el != null;
-    });
-
-    let itemsToAnalyze = [];
-    for (let i = 0; i < filterArray.length; i++) {
-      itemsToAnalyze.push({ id: i + 1, sentence: filterArray[i] });
-    }
-    return itemsToAnalyze;
-  }
-
-  parseResponse(response) {
-    const responseArray = JSON.parse(response);
-    let resultItems = [];
-    for (let i = 0; i < responseArray.length; i++) {
-      const entityArrayItem = responseArray[i]["entities"];
-      for (let j = 0; j < entityArrayItem.length; j++) {
-        const entityItem = entityArrayItem[j];
-        const tempStartSpan = { startSpan: entityItem["start_span"] };
-        const tempEndSpan = { endSpan: entityItem["end_span"] };
-        const tempEntity = {
-          "entity": {
-            "name": entityItem["name"],
-            "type": entityItem["type"],
-          },
-        };
-        resultItems.push(Object.assign(tempEntity, tempStartSpan, tempEndSpan));
-      }
-    }
-    return resultItems;
   }
 
   canBeInvoked() {
-    return typeof this.state.message !== "undefined" && this.state.message.trim() !== "";
+    const { status, textInputValue } = this.state;
+    const { isAllRequirementsMet } = status;
+
+    return isAllRequirementsMet && textInputValue !== EMPTY_STRING;
+  }
+
+  isOk(status) {
+    return status === OK_CODE;
+  }
+
+  handleTextInput(event) {
+    const targetName = event.target.name;
+    const targetValue = event.target.value;
+
+    this.validateInput(targetValue);
+
+    this.setState({
+      [targetName]: targetValue,
+    });
+  }
+
+  constructRequest(data) {
+    const dataArray = data.replaceAll("\n", " ");
+
+    let request = [{ id: 0, sentence: dataArray }];
+
+    return JSON.stringify(request);
+  }
+
+  parseResponse(response) {
+    const { message, status, statusMessage } = response;
+    if (!this.isOk(status)) {
+      throw new Error(statusMessage);
+    }
+    const resultArray = JSON.parse(message.getValue());
+
+    let result = resultArray.map((resultItem) => {
+      return resultItem.entities;
+    });
+
+    this.setState({
+      response: result.flat(),
+    });
   }
 
   submitAction() {
-    const { methodName } = this.state;
-    const methodDescriptor = RecognizeMessage[methodName];
+    const { textInputValue } = this.state;
+    const { service } = MODEL;
+
+    const methodDescriptor = RecognizeMessage[service.METHOD];
     const request = new methodDescriptor.requestType();
-    request.setValue(JSON.stringify(this.handleSentences()));
+
+    request.setValue(this.constructRequest(textInputValue));
+
     const props = {
       request,
-      onEnd: ({ message }) => {
-        this.setState({ value: message.getValue() });
-      },
+      onEnd: (response) => this.parseResponse(response),
     };
     this.props.serviceClient.unary(methodDescriptor, props);
-    this.setState({reqStart: new Date()});
   }
 
-  renderForm() {
+  inputMaxLengthHelperFunction(textLengthValue, restrictionKey) {
+    const { labels } = LABELS;
+
     return (
-      <React.Fragment>
-        <Grid item xs={12} style={{ textAlign: "left" }}>
-
-          <OutlinedDropDown
-            id="params"
-            name="selected_example"
-            label="Parameters"
-            helperTxt="Select an example"
-            fullWidth={false}
-            list={this.state.exampleList}
-            value={this.state.selectedExample}
-            onChange={this.handleParameterChange}
-            htmlTooltip={
-              <div>
-                <p>Example1 option: This is an example of three sentences splited by break lines. </p>
-                <p>Custom text: This option keep the input area empty to you set your own sentence.</p>
-              </div>
-            }
-          />
-        </Grid>
-        <Grid item xs={12} style={{ textAlign: "left" }}>
-
-          <OutlinedTextArea
-            id="input_text"
-            ref={this.textInput}
-            name="message"
-            label="Input Text"
-            value={this.state.message}
-            helperTxt={this.state.message.length + " / 5000 char "}
-            rows={5}
-            charLimit={5000}
-            onChange={this.handleInputText}
-            htmlTooltip={
-              <div>
-                <p>Write a sentence to be processed</p>
-              </div>
-            }
-          />
-
-        </Grid>
-        <Grid item xs={12} style={{ textAlign: "center" }}>
-          <Button variant="contained" color="primary" onClick={this.submitAction} disabled={!this.canBeInvoked()}>
-            Invoke
-          </Button>
-        </Grid>
-      </React.Fragment>
+      textLengthValue +
+      SPACED_SLASH +
+      rangeRestrictions[restrictionKey].max +
+      SPACE +
+      labels.CHARS
     );
   }
 
-  renderComplete() {
-    const response = this.parseResponse(this.state.value);
-    const responseTime = (new Date() - this.state.reqStart) / 1000;
-    let highlitedText = this.state.message;
-    if(response){
-      response.map((item,index) => {
-        highlitedText = highlitedText.replace(item.entity.name, `<b>${item.entity.name}</b>`);
-      });
+  createHandleConfiguration(meta) {
+    const { handleFunctionKey, helperFunctionKey, rangeRestrictionKey } = meta;
+
+    let InputHandlerConfiguration = {};
+
+    if (this[helperFunctionKey]) {
+      //helper is const string for single render and it have to be constructed before used -> call()
+      InputHandlerConfiguration[outlinedTextAreaAdditionalProps.HELPER] = this[
+        helperFunctionKey
+      ].call(this, this.state[meta.stateKey].length, rangeRestrictionKey);
+    }
+    if (this[handleFunctionKey]) {
+      InputHandlerConfiguration[
+        outlinedTextAreaAdditionalProps.ON_CHANGE
+      ] = this[handleFunctionKey];
+    }
+    if (rangeRestrictions[meta.rangeRestrictionKey].max) {
+      InputHandlerConfiguration[outlinedTextAreaAdditionalProps.CHAR_LIMIT] =
+        rangeRestrictions[meta.rangeRestrictionKey].max;
+    }
+    return InputHandlerConfiguration;
+  }
+
+  renderTextArea(meta) {
+    const { labels } = LABELS;
+
+    let InputHandlerConfiguration = [];
+
+    if (meta.edit) {
+      InputHandlerConfiguration = this.createHandleConfiguration(meta);
     }
 
     return (
-
-      <div style={{ background: "#F8F8F8", padding: "24px" }}>
-
-        <OutlinedLabel
-          infoTitle="Status"
-          value="Success"
-          variant="bottomLine"
-          htmlTooltip={
-            <p>Service status</p>
-          }
+      <Grid item xs={12} container justify="center">
+        <OutlinedTextArea
+          fullWidth={true}
+          id={meta.id}
+          name={meta.name}
+          rows={meta.rows}
+          label={labels[meta.labelKey]}
+          value={this.state[meta.stateKey]}
+          {...InputHandlerConfiguration}
         />
+      </Grid>
+    );
+  }
 
-        <OutlinedLabel
-          infoTitle="Time"
-          value={`${responseTime} seconds`}
-          variant="bottomLine"
-          htmlTooltip={
-            <p>Service processing time</p>
-          }
-        />
+  renderOutputTableLine(outputKey) {
+    const { classes } = this.props;
 
-        <OutlinedLabel
-          infoTitle="Input Text"
-          htmlValue={
-            <p>{parse(highlitedText)}</p>
-          }
-          // value={highlitedText}
-          variant="bottomLine"
-          htmlTooltip={
-            <p>Informed text</p>
-          }
-        />
+    return (
+      <Grid
+        className={classes.tableLine}
+        item
+        xs={12}
+        container
+        justify="flex-start"
+        key={outputKey[responseFields.START_SPAN]}
+      >
+        <Grid item xs={4}>
+          {outputKey[responseFields.NAME]}
+        </Grid>
+        <Grid item xs={4}>
+          {outputKey[responseFields.TYPE]}
+        </Grid>
+        <Grid item xs={4}>
+          {outputKey[responseFields.START_SPAN] +
+            DASH +
+            outputKey[responseFields.END_SPAN]}
+        </Grid>
+      </Grid>
+    );
+  }
 
-        <OutlinedLabel
-          infoTitle="Named Entity Recognition"
-          htmlValue={
-            <Grid container
-                  direction="row"
-                  justify="center"
-                  alignItems="center"
+  renderOutputTable() {
+    const { classes } = this.props;
+    const { response } = this.state;
+    const { labels } = LABELS;
+
+    return (
+      <Grid container item xs={12} className={classes.table}>
+        <Grid container item xs={12} className={classes.tableTitle}>
+          <Grid item xs={4}>
+            {labels.ENTITY}
+          </Grid>
+          <Grid item xs={4}>
+            {labels.TYPE}
+          </Grid>
+          <Grid item xs={4}>
+            {labels.CHAR_POSITION}
+          </Grid>
+        </Grid>
+        {response.map((outputKey) => this.renderOutputTableLine(outputKey))}
+      </Grid>
+    );
+  }
+
+  renderServiceOutputBlock() {
+    const { labels } = LABELS;
+    const { classes } = this.props;
+
+    return (
+      <Grid item xs={12} container justify="flex-start">
+        <span className={classes.outputLabel}>{labels.SERVICE_OUTPUT}</span>
+        {this.renderOutputTable()}
+      </Grid>
+    );
+  }
+
+  renderInfoBlock() {
+    const { informationLinks } = MODEL;
+    const { informationBlocks } = BLOCKS;
+    const { labels } = LABELS;
+
+    const links = Object.values(informationBlocks);
+
+    return (
+      <Grid item xs container justify="flex-end">
+        {links.map((link) => (
+          <Grid item key={link.linkKey}>
+            <HoverIcon
+              text={labels[link.labelKey]}
+              href={informationLinks[link.linkKey]}
             >
-              <Grid item xs={4}><span style={{ color: "#212121" }}>Entity</span></Grid>
-              <Grid item xs={4}><span style={{ color: "#212121" }}>Type</span></Grid>
-              <Grid item xs={4}><span style={{ color: "#212121" }}>Char position</span></Grid>
-              {response.map((item,index) => {
+              <SvgIcon>
+                <path d={link.svgPath} />
+              </SvgIcon>
+            </HoverIcon>
+          </Grid>
+        ))}
+      </Grid>
+    );
+  }
 
-                return (
-                  <Grid key={index} item xs={12}
-                        style={{
-                          padding: 0,
-                          marginTop: 12,
-                          backgroundColor: "rgba(155, 155, 155, 0.05)" }}
-                  >
+  renderInvokeButton() {
+    const { classes } = this.props;
+    const { labels } = LABELS;
 
-                    <Grid container
-                          direction="row"
-                          justify="center"
-                          alignItems="center"
-                    >
+    return (
+      <Grid item xs={12} className={classes.invokeButton}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={this.submitAction}
+          disabled={!this.canBeInvoked()}
+        >
+          {labels.INVOKE_BUTTON}
+        </Button>
+      </Grid>
+    );
+  }
 
-                      <Grid item xs={4}>
-                        <span style={{ color: "#666" }}>{item.entity.name}</span>
-                      </Grid>
+  renderValidationStatusBlocks(errors) {
+    const { classes } = this.props;
 
-                      <Grid item xs={4}>
-                          <span style={{ color: "#666" }}>
-                            {item.entity.type}
-                          </span>
-                      </Grid>
+    const errorKeysArray = Array.from(errors.keys());
 
-                      <Grid item xs={4}>
-                          <span style={{ color: "#666" }}>
-                            {item.startSpan} - {item.endSpan}
-                          </span>
-                      </Grid>
+    return (
+      <Grid item xs={12} container className={classes.alertsContainer}>
+        {errorKeysArray.map((arrayErrorKey) => (
+          <AlertBox
+            type={alertTypes.ERROR}
+            message={errors.get(arrayErrorKey)}
+            className={classes.alertMessage}
+            key={arrayErrorKey}
+          />
+        ))}
+      </Grid>
+    );
+  }
 
-                    </Grid>
-                  </Grid>
-                );
-              })}
-            </Grid>
-          }
-          variant="bottomLine"
-          htmlTooltip={
-            <p>Service response details</p>
-          }
-        />
-      </div>
+  renderServiceInput() {
+    const { inputBlocks } = BLOCKS;
+    const { errors } = this.state.status;
+    return (
+      <Grid container direction="column" justify="center">
+        {this.renderTextArea(inputBlocks.TEXT_INPUT)}
+        {this.renderInfoBlock()}
+        {this.renderInvokeButton()}
+        {errors.size ? this.renderValidationStatusBlocks(errors) : null}
+      </Grid>
+    );
+  }
 
+  renderServiceOutput() {
+    const { response } = this.state;
+    const { outputBlocks } = BLOCKS;
+    const { status } = LABELS;
+
+    if (!response) {
+      return <h4>{status.NO_RESPONSE}</h4>;
+    }
+
+    return (
+      <Grid container direction="column" justify="center">
+        {this.renderTextArea(outputBlocks.USER_TEXT_INPUT)}
+        {this.renderServiceOutputBlock()}
+        {this.renderInfoBlock()}
+      </Grid>
     );
   }
 
   render() {
-    if (this.props.isComplete)
-      return (
-        <div style={{ flexGrow: 1 }}>
-          <Grid
-            container
-            direction="row"
-            justify="center"
-            alignItems="center"
-            style={{ marginTop: 15, marginBottom: 15 }}
-          >
-            {this.renderComplete()}
-          </Grid>
-        </div>
-      );
-    else {
-      return (
-        <div style={{ flexGrow: 1 }}>
-          <Grid
-            container
-            direction="row"
-            justify="center"
-            alignItems="center"
-            style={{ marginTop: 15, marginBottom: 15 }}
-          >
-            {this.renderForm()}
-          </Grid>
-        </div>
-      );
+    if (!this.props.isComplete) {
+      return this.renderServiceInput();
+    } else {
+      return this.renderServiceOutput();
     }
   }
 }
+export default withStyles(useStyles)(NamedEntityRecognitionService);
