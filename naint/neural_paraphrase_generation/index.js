@@ -1,145 +1,323 @@
 import React from "react";
 import Grid from "@material-ui/core/Grid";
+import OutlinedTextArea from "../../common/OutlinedTextArea";
 import Button from "@material-ui/core/Button";
 import SvgIcon from "@material-ui/core/SvgIcon";
-import InfoIcon from "@material-ui/icons/Info";
-
 import HoverIcon from "../../standardComponents/HoverIcon";
-import OutlinedTextArea from "../../common/OutlinedTextArea";
+import AlertBox, { alertTypes } from "../../../../components/common/AlertBox";
+import { paraphrase } from "./neural_paraphrase_generation_pb_service";
+import { MODEL, BLOCKS, LABELS } from "./metadata";
+import { useStyles } from "./styles";
+import { withStyles } from "@material-ui/styles";
 
-import { paraphrase } from "./paraphrase_pb_service";
+const { rangeRestrictions, valueRestrictions } = MODEL.restrictions;
+const onlyLatinsRegex = new RegExp(valueRestrictions.ONLY_LATINS_REGEX.value);
 
-export default class MultipleParaphraseGeneration extends React.Component {
+const EMPTY_STRING = "";
+const OK_CODE = 0;
+const SPACE = " ";
+const SPACED_SLASH = " / ";
+
+const outlinedTextAreaAdditionalProps = {
+  HELPER: "helperTxt",
+  ON_CHANGE: "onChange",
+  CHAR_LIMIT: "charLimit",
+};
+
+class MultipleParaphraseGeneration extends React.Component {
   constructor(props) {
+    const { state } = MODEL;
     super(props);
     this.submitAction = this.submitAction.bind(this);
-    this.handleFormUpdate = this.handleFormUpdate.bind(this);
+    this.handleTextInput = this.handleTextInput.bind(this);
+    this.inputMaxLengthHelperFunction = this.inputMaxLengthHelperFunction.bind(
+      this
+    );
 
-    this.state = {
-      users_guide: "https://github.com/iktina/neural-paraphrase-generation",
-      code_repo: "https://github.com/iktina/neural-paraphrase-generation",
-      reference: "https://github.com/iktina/neural-paraphrase-generation",
-      sentence: "",
-      maxTextLength: 1000,
-      answer: undefined,
+    this.state = state;
+  }
+
+  getErrorMessageByKey(errorKey) {
+    const { errors } = LABELS;
+    return errors[errorKey];
+  }
+
+  getValidationMeta() {
+    const errorKey = valueRestrictions.ONLY_LATINS_REGEX.errorKey;
+    return {
+      regex: onlyLatinsRegex,
+      errorKey: errorKey,
     };
   }
 
-  canBeInvoked() {
-    return this.state.sentence !== "";
+  isValidInput(regex, text) {
+    return regex.exec(text);
   }
 
-  handleFormUpdate(event) {
-    let data = event.target.value
+  validateInput(targetValue) {
+    const { errors } = this.state.status;
+    const { regex, errorKey } = this.getValidationMeta();
+    let isAllRequirementsMet = true;
+
+    if (!this.isValidInput(regex, targetValue)) {
+      const errorMessage = this.getErrorMessageByKey(errorKey);
+      errors.set(errorKey, errorMessage);
+    } else {
+      errors.delete(errorKey);
+    }
+
+    if (errors.size > 0) {
+      isAllRequirementsMet = false;
+    }
+
     this.setState({
-      sentence: data
+      status: {
+        errors: errors,
+        isAllRequirementsMet: isAllRequirementsMet,
+      },
+    });
+  }
+
+  canBeInvoked() {
+    const { status, textInputValue } = this.state;
+    const { isAllRequirementsMet } = status;
+
+    return isAllRequirementsMet && textInputValue !== EMPTY_STRING;
+  }
+
+  isOk(status) {
+    return status === OK_CODE;
+  }
+
+  handleTextInput(event) {
+    const targetName = event.target.name;
+    const targetValue = event.target.value;
+
+    this.validateInput(targetValue);
+
+    this.setState({
+      [targetName]: targetValue,
+    });
+  }
+
+  parseResponse(response) {
+    const { message, status, statusMessage } = response;
+
+    if (!this.isOk(status)) {
+      throw new Error(statusMessage);
+    }
+
+    //Backend response contains 10 messages
+    //each message is devided with \n
+    //at the end of response there is trailing \n
+    //so, split("\n") returns 11 array cells
+    const result = message.getAnswer().split("\n");
+    //deleting last empty array element
+    result.pop();
+
+    this.setState({
+      response: result,
     });
   }
 
   submitAction() {
-    const { sentence } = this.state;
-    const methodDescriptor = paraphrase["paraphrase"];
+    const { textInputValue } = this.state;
+    const { service } = MODEL;
+
+    const methodDescriptor = paraphrase[service.METHOD];
     const request = new methodDescriptor.requestType();
 
-    request.setSentence(sentence);
+    request.setSentence(textInputValue);
 
     const props = {
       request,
-      onEnd: ({ message }) => {
-        this.setState({
-          response: { status: "success", answer: message.getAnswer() },
-        });
-      },
+      onEnd: (response) => this.parseResponse(response),
     };
-
     this.props.serviceClient.unary(methodDescriptor, props);
   }
 
-  renderForm() {
+  inputMaxLengthHelperFunction(textLengthValue, restrictionKey) {
+    const { labels } = LABELS;
+
     return (
-      <React.Fragment>
-        <Grid container direction="column" justify="center">
-          <Grid item xs={12} style={{ textAlign: "left" }}>
-            <OutlinedTextArea
-              id="sentence"
-              name="sentence"
-              label="Sentence to paraphrase"
-              fullWidth={true}
-              value={this.state.sentence}
-              rows={5}
-              charLimit={this.state.maxTextLength}
-              helperTxt={this.state.sentence.length + " / " + this.state.maxTextLength + " char"}
-              onChange={this.handleFormUpdate}
-            />
-          </Grid>
-
-          <Grid item xs container justify="flex-end">
-            <Grid item>
-              <HoverIcon text="View code on Github" href={this.state.code_repo}>
-                <SvgIcon>
-                  <path
-                    d="M12.007 0C6.12 0 1.1 4.27.157 10.08c-.944 5.813 2.468 11.45 8.054 13.312.19.064.397.033.555-.084.16-.117.25-.304.244-.5v-2.042c-3.33.735-4.037-1.56-4.037-1.56-.22-.726-.694-1.35-1.334-1.756-1.096-.75.074-.735.074-.735.773.103 1.454.557 1.846 1.23.694 1.21 2.23 1.638 3.45.96.056-.61.327-1.178.766-1.605-2.67-.3-5.462-1.335-5.462-6.002-.02-1.193.42-2.35 1.23-3.226-.327-1.015-.27-2.116.166-3.09 0 0 1.006-.33 3.3 1.23 1.966-.538 4.04-.538 6.003 0 2.295-1.5 3.3-1.23 3.3-1.23.445 1.006.49 2.144.12 3.18.81.877 1.25 2.033 1.23 3.226 0 4.607-2.805 5.627-5.476 5.927.578.583.88 1.386.825 2.206v3.29c-.005.2.092.393.26.507.164.115.377.14.565.063 5.568-1.88 8.956-7.514 8.007-13.313C22.892 4.267 17.884.007 12.008 0z"
-                  />
-                </SvgIcon>
-              </HoverIcon>
-            </Grid>
-            <Grid item>
-              <HoverIcon text="User's guide" href={this.state.users_guide}>
-                <InfoIcon />
-              </HoverIcon>
-            </Grid>
-            <Grid item>
-              <HoverIcon text="View original project" href={this.state.reference}>
-                <SvgIcon>
-                  <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 11.701c0 2.857-1.869 4.779-4.5 5.299l-.498-1.063c1.219-.459 2.001-1.822 2.001-2.929h-2.003v-5.008h5v3.701zm6 0c0 2.857-1.869 4.779-4.5 5.299l-.498-1.063c1.219-.459 2.001-1.822 2.001-2.929h-2.003v-5.008h5v3.701z" />
-                </SvgIcon>
-              </HoverIcon>
-            </Grid>
-          </Grid>
-
-          <Grid item xs={12} style={{ textAlign: "center" }}>
-            <Button variant="contained" color="primary" onClick={this.submitAction} disabled={!this.canBeInvoked()}>
-              Invoke
-            </Button>
-          </Grid>
-        </Grid>
-      </React.Fragment>
+      textLengthValue +
+      SPACED_SLASH +
+      rangeRestrictions[restrictionKey].max +
+      SPACE +
+      labels.CHARS
     );
   }
 
-  renderComplete() {
+  createHandleConfiguration(meta) {
+    const { handleFunctionKey, helperFunctionKey, rangeRestrictionKey } = meta;
+
+    let InputHandlerConfiguration = {};
+
+    if (this[helperFunctionKey]) {
+      //helper is const string for single render and it have to be constructed before used -> call()
+      InputHandlerConfiguration[outlinedTextAreaAdditionalProps.HELPER] = this[
+        helperFunctionKey
+      ].call(this, this.state[meta.stateKey].length, rangeRestrictionKey);
+    }
+    if (this[handleFunctionKey]) {
+      InputHandlerConfiguration[
+        outlinedTextAreaAdditionalProps.ON_CHANGE
+      ] = this[handleFunctionKey];
+    }
+    if (rangeRestrictions[meta.rangeRestrictionKey].max) {
+      InputHandlerConfiguration[outlinedTextAreaAdditionalProps.CHAR_LIMIT] =
+        rangeRestrictions[meta.rangeRestrictionKey].max;
+    }
+    return InputHandlerConfiguration;
+  }
+
+  renderTextArea(meta) {
+    const { labels } = LABELS;
+
+    let InputHandlerConfiguration = [];
+
+    if (meta.edit) {
+      InputHandlerConfiguration = this.createHandleConfiguration(meta);
+    }
+
+    return (
+      <Grid item xs={12} container justify="center">
+        <OutlinedTextArea
+          fullWidth={true}
+          id={meta.id}
+          name={meta.name}
+          rows={meta.rows}
+          label={labels[meta.labelKey]}
+          value={this.state[meta.stateKey]}
+          {...InputHandlerConfiguration}
+        />
+      </Grid>
+    );
+  }
+
+  renderOutputLine(outputKey) {
+    const { classes } = this.props;
+
+    return (
+      <Grid className={classes.outputLine} item xs={12} key={outputKey}>
+        {outputKey}
+      </Grid>
+    );
+  }
+
+  renderOutputBlockSet() {
+    const { labels } = LABELS;
+    const { classes } = this.props;
     const { response } = this.state;
 
     return (
+      <Grid item xs={12} container justify="flex-start">
+        <span className={classes.outputLabel}>{labels.SERVICE_OUTPUT}</span>
+        {response.map((outputKey) => this.renderOutputLine(outputKey))}
+      </Grid>
+    );
+  }
 
-      <React.Fragment>
-        <div>
-          <p style={{ fontSize: "16px" }}>
-            Your input is <b>{this.state.sentence}</b>{" "}
-          </p>
-        </div>
-        <Grid container direction="column" justify="center">
-          <Grid item xs={12} style={{ textAlign: "left", lineHeight: "20px" }}>
-            <OutlinedTextArea
-              id="paraphrase"
-              name="paraphrase"
-              label="Result:"
-              fullWidth={true}
-              value={this.state.response.answer}
-              rows={15}
-              charLimit={5000}
-              onChange={this.handleFormUpdate}
-            />
+  renderInfoBlock() {
+    const { informationLinks } = MODEL;
+    const { informationBlocks } = BLOCKS;
+    const { labels } = LABELS;
+
+    const links = Object.values(informationBlocks);
+
+    return (
+      <Grid item xs container justify="flex-end">
+        {links.map((link) => (
+          <Grid item key={link.linkKey}>
+            <HoverIcon
+              text={labels[link.labelKey]}
+              href={informationLinks[link.linkKey]}
+            >
+              <SvgIcon>
+                <path d={link.svgPath} />
+              </SvgIcon>
+            </HoverIcon>
           </Grid>
-        </Grid>
-      </React.Fragment>
+        ))}
+      </Grid>
+    );
+  }
+
+  renderInvokeButton() {
+    const { classes } = this.props;
+    const { labels } = LABELS;
+
+    return (
+      <Grid item xs={12} className={classes.invokeButton}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={this.submitAction}
+          disabled={!this.canBeInvoked()}
+        >
+          {labels.INVOKE_BUTTON}
+        </Button>
+      </Grid>
+    );
+  }
+
+  renderValidationStatusBlocks(errors) {
+    const { classes } = this.props;
+
+    const errorKeysArray = Array.from(errors.keys());
+
+    return (
+      <Grid item xs={12} container className={classes.alertsContainer}>
+        {errorKeysArray.map((arrayErrorKey) => (
+          <AlertBox
+            type={alertTypes.ERROR}
+            message={errors.get(arrayErrorKey)}
+            className={classes.alertMessage}
+            key={arrayErrorKey}
+          />
+        ))}
+      </Grid>
+    );
+  }
+
+  renderServiceInput() {
+    const { inputBlocks } = BLOCKS;
+    const { errors } = this.state.status;
+    return (
+      <Grid container direction="column" justify="center">
+        {this.renderTextArea(inputBlocks.TEXT_INPUT)}
+        {this.renderInfoBlock()}
+        {this.renderInvokeButton()}
+        {errors.size ? this.renderValidationStatusBlocks(errors) : null}
+      </Grid>
+    );
+  }
+
+  renderServiceOutput() {
+    const { response } = this.state;
+    const { outputBlocks } = BLOCKS;
+    const { status } = LABELS;
+
+    if (!response) {
+      return <h4>{status.NO_RESPONSE}</h4>;
+    }
+
+    return (
+      <Grid container direction="column" justify="center">
+        {this.renderTextArea(outputBlocks.USER_TEXT_INPUT)}
+        {this.renderOutputBlockSet()}
+        {this.renderInfoBlock()}
+      </Grid>
     );
   }
 
   render() {
-    if (this.props.isComplete) return <div>{this.renderComplete()}</div>;
-    else {
-      return <div>{this.renderForm()}</div>;
+    if (!this.props.isComplete) {
+      return this.renderServiceInput();
+    } else {
+      return this.renderServiceOutput();
     }
   }
 }
+
+export default withStyles(useStyles)(MultipleParaphraseGeneration);

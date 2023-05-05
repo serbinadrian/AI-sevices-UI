@@ -1,7 +1,7 @@
 // package: paraphrase
-// file: paraphrase.proto
+// file: neural_paraphrase_generation.proto
 
-var paraphrase_pb = require("./paraphrase_pb");
+var neural_paraphrase_generation_pb = require("./neural_paraphrase_generation_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
 var paraphrase = (function () {
@@ -15,8 +15,8 @@ paraphrase.paraphrase = {
   service: paraphrase,
   requestStream: false,
   responseStream: false,
-  requestType: paraphrase_pb.Query,
-  responseType: paraphrase_pb.Answer
+  requestType: neural_paraphrase_generation_pb.Query,
+  responseType: neural_paraphrase_generation_pb.Answer
 };
 
 exports.paraphrase = paraphrase;
