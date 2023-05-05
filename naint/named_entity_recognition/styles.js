@@ -16,11 +16,12 @@ export const useStyles = () => ({
     padding: "10px 5px",
     borderRadius: "5px",
   },
-  tableTitle: {
+  tableHeader: {
     marginBottom: "10px",
     padding: "0 5px",
+    fontWeight: "700",
   },
-  tableLine: {
+  tableRow: {
     background: "#F1F1F1",
     color: "#666666",
     borderRadius: "5px",

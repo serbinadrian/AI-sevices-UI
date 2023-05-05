@@ -30,6 +30,12 @@ const responseFields = {
   TYPE: "type",
   START_SPAN: "start_span",
   END_SPAN: "end_span",
+  CHAR_POSITION: "charPosition",
+};
+
+const tableLineTypes = {
+  HEADER: "header",
+  ROW: "row",
 };
 
 class NamedEntityRecognitionService extends React.Component {
@@ -183,6 +189,83 @@ class NamedEntityRecognitionService extends React.Component {
     return InputHandlerConfiguration;
   }
 
+  charPosition(startSpan, endSpan) {
+    return startSpan + DASH + endSpan;
+  }
+
+  constructTableHeader() {
+    const { labels } = LABELS;
+
+    return {
+      name: labels.ENTITY,
+      type: labels.TYPE,
+      charPosition: labels.CHAR_POSITION,
+    };
+  }
+
+  constructTableRows(responseData) {
+    const dataTable = [];
+
+    responseData.forEach((responseDataKey) => {
+      const responseDataCharPosition = this.charPosition(
+        responseDataKey[responseFields.START_SPAN],
+        responseDataKey[responseFields.END_SPAN]
+      );
+      const responseDataObj = {
+        name: responseDataKey[responseFields.NAME],
+        type: responseDataKey[responseFields.TYPE],
+        charPosition: responseDataCharPosition,
+      };
+
+      dataTable.push(responseDataObj);
+    });
+
+    return dataTable;
+  }
+
+  renderOutputTableRow(dataTableRow, typeRow) {
+    const { classes } = this.props;
+
+    const dataTableRowKeys = Object.keys(dataTableRow);
+
+    return (
+      <Grid
+        container
+        item
+        xs={12}
+        key={dataTableRow[responseFields.CHAR_POSITION]}
+        className={
+          typeRow === tableLineTypes.HEADER
+            ? classes.tableHeader
+            : classes.tableRow
+        }
+      >
+        {dataTableRowKeys.map((dataTableRowKey) => (
+          <Grid item xs={4} key={dataTableRow[dataTableRowKey]}>
+            {dataTableRow[dataTableRowKey]}
+          </Grid>
+        ))}
+      </Grid>
+    );
+  }
+
+  renderOutputTable() {
+    const { classes } = this.props;
+    const { response } = this.state;
+
+    const tableHeader = this.constructTableHeader();
+    const responseData = this.constructTableRows(response);
+
+    return (
+      <Grid container item xs={12} className={classes.table}>
+        {this.renderOutputTableRow(tableHeader, tableLineTypes.HEADER)}
+        {responseData.map((responseDataRow) =>
+          this.renderOutputTableRow(responseDataRow, tableLineTypes.ROW)
+        )}
+      </Grid>
+    );
+  }
+
   renderTextArea(meta) {
     const { labels } = LABELS;
 
@@ -203,56 +286,6 @@ class NamedEntityRecognitionService extends React.Component {
           value={this.state[meta.stateKey]}
           {...InputHandlerConfiguration}
         />
-      </Grid>
-    );
-  }
-
-  renderOutputTableLine(outputKey) {
-    const { classes } = this.props;
-
-    return (
-      <Grid
-        className={classes.tableLine}
-        item
-        xs={12}
-        container
-        justify="flex-start"
-        key={outputKey[responseFields.START_SPAN]}
-      >
-        <Grid item xs={4}>
-          {outputKey[responseFields.NAME]}
-        </Grid>
-        <Grid item xs={4}>
-          {outputKey[responseFields.TYPE]}
-        </Grid>
-        <Grid item xs={4}>
-          {outputKey[responseFields.START_SPAN] +
-            DASH +
-            outputKey[responseFields.END_SPAN]}
-        </Grid>
-      </Grid>
-    );
-  }
-
-  renderOutputTable() {
-    const { classes } = this.props;
-    const { response } = this.state;
-    const { labels } = LABELS;
-
-    return (
-      <Grid container item xs={12} className={classes.table}>
-        <Grid container item xs={12} className={classes.tableTitle}>
-          <Grid item xs={4}>
-            {labels.ENTITY}
-          </Grid>
-          <Grid item xs={4}>
-            {labels.TYPE}
-          </Grid>
-          <Grid item xs={4}>
-            {labels.CHAR_POSITION}
-          </Grid>
-        </Grid>
-        {response.map((outputKey) => this.renderOutputTableLine(outputKey))}
       </Grid>
     );
   }

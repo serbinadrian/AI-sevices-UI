@@ -1,9 +1,8 @@
 export const MODEL = {
   informationLinks: {
-    GIT_HUB: "https://github.com/iktina/neural-abstractive-summarization",
-    USER_GUIDE: "https://github.com/iktina/neural-abstractive-summarization",
-    ORIGINAL_PROJECT:
-      "https://github.com/iktina/neural-abstractive-summarization",
+    GIT_HUB: "https://github.com/iktina/named-entity-recognition",
+    USER_GUIDE: "https://github.com/iktina/named-entity-recognition",
+    ORIGINAL_PROJECT: "https://github.com/iktina/named-entity-recognition",
   },
   state: {
     response: undefined,
@@ -50,10 +49,9 @@ export const BLOCKS = {
   },
   outputBlocks: {
     SERVICE_OUTPUT: {
-      type: "text-area",
+      type: "table",
       id: "service-response",
       name: "service-response",
-      rows: 5,
       edit: false,
       stateKey: "response",
       labelKey: "SERVICE_OUTPUT",
