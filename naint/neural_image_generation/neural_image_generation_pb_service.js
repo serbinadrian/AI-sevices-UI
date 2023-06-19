@@ -1,7 +1,7 @@
 // package: image_generation
-// file: imagegen.proto
+// file: neural_image_generation.proto
 
-var imagegen_pb = require("./imagegen_pb");
+var neural_image_generation_pb = require("./neural_image_generation_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
 var image_generation = (function () {
@@ -15,8 +15,8 @@ image_generation.Gen = {
   service: image_generation,
   requestStream: false,
   responseStream: false,
-  requestType: imagegen_pb.Text,
-  responseType: imagegen_pb.Image
+  requestType: neural_image_generation_pb.Text,
+  responseType: neural_image_generation_pb.Image
 };
 
 exports.image_generation = image_generation;
