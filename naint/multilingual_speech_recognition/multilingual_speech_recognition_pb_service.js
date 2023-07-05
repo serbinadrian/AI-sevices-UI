@@ -1,7 +1,7 @@
 // package: m_asr
-// file: M_ASR.proto
+// file: multilingual_speech_recognition.proto
 
-var M_ASR_pb = require("./M_ASR_pb");
+var multilingual_speech_recognition_pb = require("./multilingual_speech_recognition_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
 var M_ASR = (function () {
@@ -15,8 +15,8 @@ M_ASR.s2t = {
   service: M_ASR,
   requestStream: false,
   responseStream: false,
-  requestType: M_ASR_pb.Audio,
-  responseType: M_ASR_pb.Text
+  requestType: multilingual_speech_recognition_pb.Audio,
+  responseType: multilingual_speech_recognition_pb.Text
 };
 
 exports.M_ASR = M_ASR;

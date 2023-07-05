@@ -1,286 +1,365 @@
 import React from "react";
-import ReactDOM from 'react-dom';
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import SvgIcon from "@material-ui/core/SvgIcon";
-import InfoIcon from "@material-ui/icons/Info";
 import OutlinedTextArea from "../../common/OutlinedTextArea";
 import HoverIcon from "../../standardComponents/HoverIcon";
 import FileUploader from "../../common/FileUploader";
+import AlertBox, { alertTypes } from "../../../../components/common/AlertBox";
+import { MODEL, BLOCKS, LABELS } from "./metadata";
+import { useStyles } from "./styles";
+import { withStyles } from "@material-ui/styles";
+import { M_ASR } from "./multilingual_speech_recognition_pb_service";
 
-import { M_ASR } from "./M_ASR_pb_service";
+const { rangeRestrictions, valueRestrictions } = MODEL.restrictions;
+// const onlyWavFiletypeRegex = new RegExp(
+//   valueRestrictions.ONLY_WAV_FILETYPE_REGEX.value
+// );
 
-const initialUserInput = {
-  data: new ArrayBuffer(),
-  uploadedFile: null,
-  isValid: {
-    validMeta: false,
-    validWAV: false,
-    validFileExtension: false
-  },
-  maxFileSize: 4194304, //4mb 
-  maxDuration: 90, //seconds
-  supportedFileExtensions: /(\.wav)$/i
-};
+const EMPTY_STRING = "";
+const OK_CODE = 0;
+const DURATION = "duration";
+const SIZE = "size";
+const HASHTAG = "#";
 
-export default class MultilingualSpeechRecognition extends React.Component {
+class MultilingualSpeechRecognition extends React.Component {
   constructor(props) {
     super(props);
+    const { state } = MODEL;
     this.submitAction = this.submitAction.bind(this);
     this.handleFileUpload = this.handleFileUpload.bind(this);
 
-    this.state = {
-      ...initialUserInput,
-      users_guide: "https://github.com/iktina/multilingual-speech-recognition",
-      code_repo: "https://github.com/iktina/multilingual-speech-recognition",
-      reference: "https://github.com/iktina/multilingual-speech-recognition",
-      response: undefined,
-      data: undefined
-    };
+    this.state = state;
   }
 
-  setValidationStatus(key, valid) {
-    this.state.isValid[key] = valid;
-  }
-
-  clearFlags() {
-    this.state.isValid.validMeta = false;
-    this.state.isValid.validFileExtension = false;
-  }
-
-  handleValidation() {
-    const alertBoxHolder = document.querySelector('#alert-box-holder');
-    if (!this.state.isValid.validMeta || !this.state.isValid.validWAV) {
-      const alertBox = (
-        <p style={{
-          color: "#212121",
-          marginTop: "5px",
-          borderColor: "#E67381",
-          borderWidth: "1px",
-          padding: "10px",
-          background: "#FDE5E8",
-          borderRadius: "4px",
-          borderStyle: "solid",
-          fontSize: "16px"
-        }}>
-          Please provide a <b>.wav</b> file <b>up to 90 seconds</b> long and <b>up to 4 mb </b> in size!
-        </p>);
-
-      ReactDOM.render(alertBox, alertBoxHolder);
-    }
-    else {
-      ReactDOM.render("", alertBoxHolder);
-    }
-  }
-
-  validateExtension(filename) {
-    const { supportedFileExtensions } = this.state;
-    return supportedFileExtensions.exec(filename) ? true : false;
-  }
-
-  validateFileExtension(file) {
-
-    let isValidFileExtension = this.validateExtension(file.name);
-
-    if (!isValidFileExtension) {
-      this.handleValidation();
-    }
-
+  clearUploadedFile() {
     this.setState({
-      isValid: {
-        validFileExtension: isValidFileExtension
-      }
+      data: undefined,
+      uploadedFile: undefined,
     });
   }
 
-  validateFileSize(size) {
-    const { maxFileSize } = this.state;
-    return size < maxFileSize && size > 0 ? true : false;
-  }
-
-  validateDuration(duration) {
-    const { maxDuration } = this.state;
-    return duration < maxDuration && duration > 0 ? true : false;
-  }
-
-  validateAudio(file, duration) {
-
-    let isFileSizeValid = false;
-    let isDurationValid = false;
-
-    if (this.state.isValid.validWAV) {
-      try {
-        isFileSizeValid = this.validateFileSize(file.size);
-        isDurationValid = this.validateDuration(duration);
-      }
-      catch (error) {
-        console.error(error);
-      }
-    }
-
+  clearErrors() {
     this.setState({
-      isValid: {
-        validMeta: isFileSizeValid && isDurationValid
-      }
+      status: {
+        errors: new Map(),
+        isAllRequirementsMet: false,
+      },
     });
-
-    this.handleValidation();
   }
 
-  handleFileUpload(files) {
-
-    this.clearFlags();
-
-    if (files.length) {
-
-      this.setState({ data: new ArrayBuffer(), uploadedFile: null });
-
-      const fileReader = new FileReader();
-
-      this.validateFileExtension(files[0]);
-      fileReader.readAsArrayBuffer(files[0]);
-
-      fileReader.onload = () => {
-
-        if (this.state.isValid.validFileExtension) {
-          let duration = -1;
-          let data = new Uint8Array(fileReader.result);
-          let blob = new Blob([data], { type: "audio/wav" });
-          let audioContainer = document.querySelector("#audio-container");
-          let audio = document.createElement("audio");
-          let audioURL = window.URL.createObjectURL(blob);
-
-          audio.setAttribute("controls", "");
-          audio.src = audioURL;
-          audio.style.height = "50px";
-          audio.style.width = "100%";
-          audio.id = "audio-element";
-          audioContainer.innerHTML = "";
-          audioContainer.appendChild(audio);
-
-
-          this.setState({ data, uploadedFile: files[0] });
-          audio.addEventListener('loadedmetadata', () => {
-            duration = audio.duration;
-            this.validateAudio(files[0], duration);
-          });
-        }
-      };
-    }
-    else {
-      this.handleValidation();
-    }
+  getErrorMessageByKey(errorKey) {
+    const { errors } = LABELS;
+    return errors[errorKey];
   }
 
   canBeInvoked() {
-    return this.state.data != undefined && this.state.isValid.validMeta ? true : false;
+    const { status, data } = this.state;
+    return status.isAllRequirementsMet && !!data;
+  }
+
+  isOk(status) {
+    return status === OK_CODE;
+  }
+
+  //if you need to check if the audio format is wav
+  // getValidationMeta() {
+  //   const errorKey = valueRestrictions.ONLY_WAV_FILETYPE_REGEX.errorKey;
+
+  //   return {
+  //     regex: onlyWavFiletypeRegex,
+  //     errorKey: errorKey,
+  //   };
+  // }
+
+  // isValidExtension(regex, filename) {
+  //   return regex.exec(filename);
+  // }
+
+  // validateFileExtension(file) {
+  //   const { errors } = this.state.status;
+  //   const { regex, errorKey } = this.getValidationMeta();
+
+  //   let isAllRequirementsMet = true;
+
+  //   if (!this.isValidExtension(regex, file.name)) {
+  //     const errorMessage = this.getErrorMessageByKey(errorKey);
+  //     errors.set(errorKey, errorMessage);
+  //   } else {
+  //     errors.delete(errorKey);
+  //   }
+
+  //   if (errors.size > 0) {
+  //     isAllRequirementsMet = false;
+  //   }
+
+  //   this.setState({
+  //     status: {
+  //       errors: errors,
+  //       isAllRequirementsMet: isAllRequirementsMet,
+  //     },
+  //   });
+  // }
+
+  validateFileParameters(file, parameter) {
+    const { FILE_RESTRICTIONS } = rangeRestrictions;
+    const { errors } = this.state.status;
+
+    const errorKeyParameterMax =
+      valueRestrictions.PRAMETER_MORE_THAN_MAX[parameter];
+    const errorKeyParameterLessThanMin =
+      valueRestrictions.PARAMETER_LESS_THAN_ZERO[parameter];
+
+    const isParameterMoreThanMax =
+      file[parameter] > FILE_RESTRICTIONS.MAX_RESTRICTION[parameter];
+    const isParameterLessThanMin = file[parameter] < 0;
+
+    let isAllRequirementsMet = true;
+
+    if (isParameterMoreThanMax) {
+      const errorMessage = this.getErrorMessageByKey(errorKeyParameterMax);
+      errors.set(errorKeyParameterMax, errorMessage);
+    }
+    if (isParameterLessThanMin) {
+      const errorMessage = this.getErrorMessageByKey(
+        errorKeyParameterLessThanMin
+      );
+      errors.set(errorKeyParameterLessThanMin, errorMessage);
+    }
+    if (errors.size > 0) {
+      isAllRequirementsMet = false;
+    }
+
+    this.setState({
+      status: {
+        errors: errors,
+        isAllRequirementsMet: isAllRequirementsMet,
+      },
+    });
+  }
+
+  validateAudio(file, audio) {
+    this.clearErrors();
+    this.validateFileParameters(audio, DURATION);
+    this.validateFileParameters(file, SIZE);
+  }
+
+  createAudioElement(blob, file) {
+    const { AUDIO_INPUT } = BLOCKS.inputBlocks;
+    const { classes } = this.props;
+
+    let audioContainer = document.querySelector(
+      HASHTAG + AUDIO_INPUT.containerID
+    );
+    let audio = document.createElement(AUDIO_INPUT.createElement);
+    let audioURL = window.URL.createObjectURL(blob);
+
+    audio.setAttribute(AUDIO_INPUT.elementAttributeName, EMPTY_STRING);
+    audio.src = audioURL;
+    audio.id = AUDIO_INPUT.elementID;
+    audio.classList.add(classes.audioElement);
+    audioContainer.innerHTML = EMPTY_STRING;
+    audioContainer.appendChild(audio);
+
+    audio.addEventListener(AUDIO_INPUT.eventListener, () => {
+      this.validateAudio(file, audio);
+    });
+  }
+
+  handleFileUpload(files) {
+    const { AUDIO_INPUT } = BLOCKS.inputBlocks;
+
+    this.clearUploadedFile();
+
+    if (files.length) {
+      this.setState({ data: new ArrayBuffer() });
+      const fileReader = new FileReader();
+
+      fileReader.readAsArrayBuffer(files[0]);
+
+      fileReader.onload = () => {
+        let data = new Uint8Array(fileReader.result);
+        let blob = new Blob([data], { type: AUDIO_INPUT.blobType });
+        this.createAudioElement(blob, files[0]);
+
+        this.setState({
+          data,
+          uploadedFile: files[0],
+        });
+      };
+    }
+  }
+
+  parseResponse(response) {
+    const { message, status, statusMessage } = response;
+
+    if (!this.isOk(status)) {
+      throw new Error(statusMessage);
+    }
+    
+    this.setState({
+      response: message.getText(),
+    });
   }
 
   submitAction() {
     const { data } = this.state;
-    const methodDescriptor = M_ASR["s2t"];
+    const { METHOD } = MODEL.service;
+
+    const methodDescriptor = M_ASR[METHOD];
     const request = new methodDescriptor.requestType();
 
     request.setData(data);
 
     const props = {
       request,
-      onEnd: response => {
-        const { message, status, statusMessage } = response;
-        if (status !== 0) {
-          throw new Error(statusMessage);
-        }
-        this.setState({
-          ...initialUserInput,
-          response: { status: "success", text: message.getText() },
-        });
-      },
+      onEnd: (response) => this.parseResponse(response),
     };
 
     this.props.serviceClient.unary(methodDescriptor, props);
   }
 
-  renderForm() {
+  renderInfoBlock() {
+    const { classes } = this.props;
+    const { informationLinks } = MODEL;
+    const { informationBlocks } = BLOCKS;
+    const { labels } = LABELS;
+
+    const links = Object.values(informationBlocks);
+
     return (
-      <React.Fragment>
-        <Grid container direction="column" justify="center" spacing={2}>
-          <Grid item xs={12} container justify="center" style={{ textAlign: "center" }}>
-            <FileUploader
-              name="data"
-              type="file"
-              uploadedFiles={this.state.uploadedFile}
-              handleFileUpload={this.handleFileUpload}
-              setValidationStatus={valid => this.setValidationStatus("validWAV", valid)}
-              fileAccept=".wav"
-            />
+      <Grid item xs container justify="flex-end">
+        {links.map((link) => (
+          <Grid item key={link.linkKey}>
+            <HoverIcon
+              className={classes.infoBlock}
+              text={labels[link.labelKey]}
+              href={informationLinks[link.linkKey]}
+            >
+              <SvgIcon>
+                <path d={link.svgPath} />
+              </SvgIcon>
+            </HoverIcon>
           </Grid>
-
-          <Grid item xs={12} style={{ textAlign: "center" }}>
-            <div id="audio-container" className="col-md-3 col-lg-2">
-              <audio controls style={{ height: "50px", width: "100%", fontSize: "13px", marginBottom: "5px" }}>
-                <source id="asrAudio" src="" type="audio/wav" />
-              </audio>
-            </div>
-          </Grid>
-
-          <Grid item xs container justify="flex-end">
-            <Grid item>
-              <HoverIcon text="View code on Github" href={this.state.code_repo}>
-                <SvgIcon>
-                  <path
-                    d="M12.007 0C6.12 0 1.1 4.27.157 10.08c-.944 5.813 2.468 11.45 8.054 13.312.19.064.397.033.555-.084.16-.117.25-.304.244-.5v-2.042c-3.33.735-4.037-1.56-4.037-1.56-.22-.726-.694-1.35-1.334-1.756-1.096-.75.074-.735.074-.735.773.103 1.454.557 1.846 1.23.694 1.21 2.23 1.638 3.45.96.056-.61.327-1.178.766-1.605-2.67-.3-5.462-1.335-5.462-6.002-.02-1.193.42-2.35 1.23-3.226-.327-1.015-.27-2.116.166-3.09 0 0 1.006-.33 3.3 1.23 1.966-.538 4.04-.538 6.003 0 2.295-1.5 3.3-1.23 3.3-1.23.445 1.006.49 2.144.12 3.18.81.877 1.25 2.033 1.23 3.226 0 4.607-2.805 5.627-5.476 5.927.578.583.88 1.386.825 2.206v3.29c-.005.2.092.393.26.507.164.115.377.14.565.063 5.568-1.88 8.956-7.514 8.007-13.313C22.892 4.267 17.884.007 12.008 0z"
-                  />
-                </SvgIcon>
-              </HoverIcon>
-            </Grid>
-            <Grid item>
-              <HoverIcon text="User's guide" href={this.state.users_guide}>
-                <InfoIcon />
-              </HoverIcon>
-            </Grid>
-            <Grid item>
-              <HoverIcon text="View original project" href={this.state.reference}>
-                <SvgIcon>
-                  <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 11.701c0 2.857-1.869 4.779-4.5 5.299l-.498-1.063c1.219-.459 2.001-1.822 2.001-2.929h-2.003v-5.008h5v3.701zm6 0c0 2.857-1.869 4.779-4.5 5.299l-.498-1.063c1.219-.459 2.001-1.822 2.001-2.929h-2.003v-5.008h5v3.701z" />
-                </SvgIcon>
-              </HoverIcon>
-            </Grid>
-          </Grid>
-
-          <Grid item xs={12} style={{ textAlign: "center" }}>
-            <Button variant="contained" color="primary" onClick={this.submitAction} disabled={!this.canBeInvoked()}>
-              Invoke
-            </Button>
-          </Grid>
-          <Grid item xs={12} style={{ textAlign: "center" }} id={"alert-box-holder"}>
-
-          </Grid>
-        </Grid>
-      </React.Fragment>
+        ))}
+      </Grid>
     );
   }
 
-  renderComplete() {
+  renderInvokeButton() {
+    const { classes } = this.props;
+    const { labels } = LABELS;
+
     return (
-      <Grid item xs={12} container justify="center" style={{ textAlign: "center" }}>
+      <Grid item xs={12} className={classes.invokeButton}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={this.submitAction}
+          disabled={!this.canBeInvoked()}
+        >
+          {labels.INVOKE_BUTTON}
+        </Button>
+      </Grid>
+    );
+  }
+
+  renderValidationStatusBlocks(errors) {
+    const { classes } = this.props;
+    const errorKeysArray = Array.from(errors.keys());
+
+    return (
+      <Grid item xs={12} container className={classes.alertsContainer}>
+        {errorKeysArray.map((arrayErrorKey) => (
+          <AlertBox
+            type={alertTypes.ERROR}
+            message={errors.get(arrayErrorKey)}
+            className={classes.alertMessage}
+            key={arrayErrorKey}
+          />
+        ))}
+      </Grid>
+    );
+  }
+
+  renderFileUploader() {
+    const { FILE_UPLOADER_INPUT, AUDIO_INPUT } = BLOCKS.inputBlocks;
+    const { classes } = this.props;
+
+    return (
+      <Grid
+        item
+        xs={12}
+        container
+        justify="center"
+        className={classes.serviceAudioInput}
+      >
+        <FileUploader
+          className={classes.fileUploader}
+          name={FILE_UPLOADER_INPUT.name}
+          type={FILE_UPLOADER_INPUT.type}
+          uploadedFiles={this.state.uploadedFile}
+          handleFileUpload={this.handleFileUpload}
+          multiple={FILE_UPLOADER_INPUT.isMultiple}
+          setValidationStatus={(valid) =>
+            console.log("FileUploader valid is", valid)
+          }
+          fileAccept={FILE_UPLOADER_INPUT.fileAccept}
+        />
+        <Grid item xs={12}>
+          <div id={AUDIO_INPUT.containerID}></div>
+        </Grid>
+      </Grid>
+    );
+  }
+
+  renderTextArea(meta) {
+    const { labels } = LABELS;
+
+    return (
+      <Grid item xs={12} container justify="center">
         <OutlinedTextArea
-          id="response_box"
-          name="response_box"
-          label="Response"
-          type="text"
           fullWidth={true}
-          value={this.state.response.text}
-          rows={8}
+          id={meta.id}
+          name={meta.name}
+          rows={meta.rows}
+          label={labels[meta.labelKey]}
+          value={this.state[meta.stateKey]}
         />
       </Grid>
     );
   }
 
+  renderServiceInput() {
+    const { errors } = this.state.status;
+    return (
+      <Grid container direction="column" justify="center">
+        {this.renderFileUploader()}
+        {this.renderInfoBlock()}
+        {this.renderInvokeButton()}
+        {errors.size ? this.renderValidationStatusBlocks(errors) : null}
+      </Grid>
+    );
+  }
+
+  renderServiceOutput() {
+    const { outputBlocks } = BLOCKS;
+
+    return (
+      <Grid container direction="column" justify="center">
+        {this.renderTextArea(outputBlocks.SERVICE_OUTPUT)}
+        {this.renderInfoBlock()}
+      </Grid>
+    );
+  }
 
   render() {
-    if (this.props.isComplete) return <div>{this.renderComplete()}</div>;
-    else {
-      return <div>{this.renderForm()}</div>;
+    if (!this.props.isComplete) {
+      return this.renderServiceInput();
+    } else {
+      return this.renderServiceOutput();
     }
   }
 }
+
+export default withStyles(useStyles)(MultilingualSpeechRecognition);
