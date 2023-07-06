@@ -1,36 +1,36 @@
-// package: MST
-// file: MST.proto
+// package: ru_asr
+// file: russian_speech_recognition.proto
 
-var MST_pb = require("./MST_pb");
+var russian_speech_recognition_pb = require("./russian_speech_recognition_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
-var MST = (function () {
-  function MST() {}
-  MST.serviceName = "MST.MST";
-  return MST;
+var ru_asr = (function () {
+  function ru_asr() {}
+  ru_asr.serviceName = "ru_asr.ru_asr";
+  return ru_asr;
 }());
 
-MST.s2t = {
+ru_asr.s2t = {
   methodName: "s2t",
-  service: MST,
+  service: ru_asr,
   requestStream: false,
   responseStream: false,
-  requestType: MST_pb.Audio,
-  responseType: MST_pb.Text
+  requestType: russian_speech_recognition_pb.Audio,
+  responseType: russian_speech_recognition_pb.Text
 };
 
-exports.MST = MST;
+exports.ru_asr = ru_asr;
 
-function MSTClient(serviceHost, options) {
+function ru_asrClient(serviceHost, options) {
   this.serviceHost = serviceHost;
   this.options = options || {};
 }
 
-MSTClient.prototype.s2t = function s2t(requestMessage, metadata, callback) {
+ru_asrClient.prototype.s2t = function s2t(requestMessage, metadata, callback) {
   if (arguments.length === 2) {
     callback = arguments[1];
   }
-  var client = grpc.unary(MST.s2t, {
+  var client = grpc.unary(ru_asr.s2t, {
     request: requestMessage,
     host: this.serviceHost,
     metadata: metadata,
@@ -57,5 +57,5 @@ MSTClient.prototype.s2t = function s2t(requestMessage, metadata, callback) {
   };
 };
 
-exports.MSTClient = MSTClient;
+exports.ru_asrClient = ru_asrClient;
 
