@@ -1,36 +1,36 @@
-// package: MST
-// file: MST.proto
+// package: emotions
+// file: speech_emotion_recognition.proto
 
-var MST_pb = require("./MST_pb");
+var speech_emotion_recognition_pb = require("./speech_emotion_recognition_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
-var MST = (function () {
-  function MST() {}
-  MST.serviceName = "MST.MST";
-  return MST;
+var emotions = (function () {
+  function emotions() {}
+  emotions.serviceName = "emotions.emotions";
+  return emotions;
 }());
 
-MST.s2t = {
-  methodName: "s2t",
-  service: MST,
+emotions.e2t = {
+  methodName: "e2t",
+  service: emotions,
   requestStream: false,
   responseStream: false,
-  requestType: MST_pb.Audio,
-  responseType: MST_pb.Text
+  requestType: speech_emotion_recognition_pb.Audio,
+  responseType: speech_emotion_recognition_pb.Text
 };
 
-exports.MST = MST;
+exports.emotions = emotions;
 
-function MSTClient(serviceHost, options) {
+function emotionsClient(serviceHost, options) {
   this.serviceHost = serviceHost;
   this.options = options || {};
 }
 
-MSTClient.prototype.s2t = function s2t(requestMessage, metadata, callback) {
+emotionsClient.prototype.e2t = function e2t(requestMessage, metadata, callback) {
   if (arguments.length === 2) {
     callback = arguments[1];
   }
-  var client = grpc.unary(MST.s2t, {
+  var client = grpc.unary(emotions.e2t, {
     request: requestMessage,
     host: this.serviceHost,
     metadata: metadata,
@@ -57,5 +57,5 @@ MSTClient.prototype.s2t = function s2t(requestMessage, metadata, callback) {
   };
 };
 
-exports.MSTClient = MSTClient;
+exports.emotionsClient = emotionsClient;
 
