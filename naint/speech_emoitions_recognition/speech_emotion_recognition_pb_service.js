@@ -1,7 +1,7 @@
 // package: emotions
-// file: emotions.proto
+// file: speech_emotion_recognition.proto
 
-var emotions_pb = require("./emotions_pb");
+var speech_emotion_recognition_pb = require("./speech_emotion_recognition_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
 var emotions = (function () {
@@ -15,8 +15,8 @@ emotions.e2t = {
   service: emotions,
   requestStream: false,
   responseStream: false,
-  requestType: emotions_pb.Audio,
-  responseType: emotions_pb.Text
+  requestType: speech_emotion_recognition_pb.Audio,
+  responseType: speech_emotion_recognition_pb.Text
 };
 
 exports.emotions = emotions;
