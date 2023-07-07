@@ -1,36 +1,36 @@
-// package: m_asr
-// file: M_ASR.proto
+// package: ru_asr
+// file: russian_speech_recognition.proto
 
-var M_ASR_pb = require("./M_ASR_pb");
+var russian_speech_recognition_pb = require("./russian_speech_recognition_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
-var M_ASR = (function () {
-  function M_ASR() {}
-  M_ASR.serviceName = "m_asr.M_ASR";
-  return M_ASR;
+var ru_asr = (function () {
+  function ru_asr() {}
+  ru_asr.serviceName = "ru_asr.ru_asr";
+  return ru_asr;
 }());
 
-M_ASR.s2t = {
+ru_asr.s2t = {
   methodName: "s2t",
-  service: M_ASR,
+  service: ru_asr,
   requestStream: false,
   responseStream: false,
-  requestType: M_ASR_pb.Audio,
-  responseType: M_ASR_pb.Text
+  requestType: russian_speech_recognition_pb.Audio,
+  responseType: russian_speech_recognition_pb.Text
 };
 
-exports.M_ASR = M_ASR;
+exports.ru_asr = ru_asr;
 
-function M_ASRClient(serviceHost, options) {
+function ru_asrClient(serviceHost, options) {
   this.serviceHost = serviceHost;
   this.options = options || {};
 }
 
-M_ASRClient.prototype.s2t = function s2t(requestMessage, metadata, callback) {
+ru_asrClient.prototype.s2t = function s2t(requestMessage, metadata, callback) {
   if (arguments.length === 2) {
     callback = arguments[1];
   }
-  var client = grpc.unary(M_ASR.s2t, {
+  var client = grpc.unary(ru_asr.s2t, {
     request: requestMessage,
     host: this.serviceHost,
     metadata: metadata,
@@ -57,5 +57,5 @@ M_ASRClient.prototype.s2t = function s2t(requestMessage, metadata, callback) {
   };
 };
 
-exports.M_ASRClient = M_ASRClient;
+exports.ru_asrClient = ru_asrClient;
 

@@ -9,7 +9,7 @@ import AlertBox, { alertTypes } from "../../../../components/common/AlertBox";
 import { MODEL, BLOCKS, LABELS } from "./metadata";
 import { useStyles } from "./styles";
 import { withStyles } from "@material-ui/styles";
-import { M_ASR } from "./multilingual_speech_recognition_pb_service";
+import { ru_asr } from "./russian_speech_recognition_pb_service";
 
 const { rangeRestrictions, valueRestrictions } = MODEL.restrictions;
 // const onlyWavFiletypeRegex = new RegExp(
@@ -22,7 +22,7 @@ const DURATION = "duration";
 const SIZE = "size";
 const HASHTAG = "#";
 
-class MultilingualSpeechRecognition extends React.Component {
+class RussianSpeechRecognition extends React.Component {
   constructor(props) {
     super(props);
     const { state } = MODEL;
@@ -196,7 +196,7 @@ class MultilingualSpeechRecognition extends React.Component {
     if (!this.isOk(status)) {
       throw new Error(statusMessage);
     }
-    
+
     this.setState({
       response: message.getText(),
     });
@@ -206,7 +206,7 @@ class MultilingualSpeechRecognition extends React.Component {
     const { data } = this.state;
     const { METHOD } = MODEL.service;
 
-    const methodDescriptor = M_ASR[METHOD];
+    const methodDescriptor = ru_asr[METHOD];
     const request = new methodDescriptor.requestType();
 
     request.setData(data);
@@ -313,6 +313,26 @@ class MultilingualSpeechRecognition extends React.Component {
     );
   }
 
+  renderAudio() {
+    const { AUDIO_OUTPUT } = BLOCKS.outputBlocks;
+    const { classes } = this.props;
+
+    let blob = new Blob([this.state.data], { type: AUDIO_OUTPUT.blobType });
+    let audioURL = window.URL.createObjectURL(blob);
+
+    return (
+      <Grid item xs={12} container justify="center">
+        <div className={classes.audioContainer}>
+          <audio
+            controls
+            src={audioURL}
+            className={classes.audioElement}
+          ></audio>
+        </div>
+      </Grid>
+    );
+  }
+
   renderTextArea(meta) {
     const { labels } = LABELS;
 
@@ -347,6 +367,7 @@ class MultilingualSpeechRecognition extends React.Component {
 
     return (
       <Grid container direction="column" justify="center">
+        {this.renderAudio()}
         {this.renderTextArea(outputBlocks.SERVICE_OUTPUT)}
         {this.renderInfoBlock()}
       </Grid>
@@ -362,4 +383,4 @@ class MultilingualSpeechRecognition extends React.Component {
   }
 }
 
-export default withStyles(useStyles)(MultilingualSpeechRecognition);
+export default withStyles(useStyles)(RussianSpeechRecognition);
