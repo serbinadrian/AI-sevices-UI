@@ -1,7 +1,7 @@
 // package: scr
-// file: scr.proto
+// file: speech_commands_recognition.proto
 
-var scr_pb = require("./scr_pb");
+var speech_commands_recognition_pb = require("./speech_commands_recognition_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
 var SCR = (function () {
@@ -15,8 +15,8 @@ SCR.sc2t = {
   service: SCR,
   requestStream: false,
   responseStream: false,
-  requestType: scr_pb.Audio,
-  responseType: scr_pb.Output_Audio
+  requestType: speech_commands_recognition_pb.Audio,
+  responseType: speech_commands_recognition_pb.Output_Audio
 };
 
 exports.SCR = SCR;
