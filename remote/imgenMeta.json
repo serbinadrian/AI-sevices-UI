@@ -1,0 +1,459 @@
+{
+  "type": "default",
+  "models": [
+    {
+      "label": "Stable Diffusion v2.1",
+      "value": "SD2_1"
+    },
+    {
+      "label": "Stable Diffusion v2.0",
+      "value": "SD2"
+    },
+    {
+      "label": "Stable Diffusion v1.5",
+      "value": "SD1_5"
+    },
+    {
+      "label": "Stable Diffusion Waifu",
+      "value": "waifu"
+    },
+    {
+      "label": "Stable Diffusion Beksinski Art",
+      "value": "beksinski"
+    },
+    {
+      "label": "Stable Diffusion GuoHua",
+      "value": "guohua"
+    },
+    {
+      "label": "Stable Diffusion Inkpunk",
+      "value": "inkpunk"
+    },
+    {
+      "label": "Stable Diffusion Dream Shaper",
+      "value": "dream_shaper"
+    },
+    {
+      "label": "Stable Diffusion Openjourney",
+      "value": "open_journey"
+    },
+    {
+      "label": "I Can't Believe It's Not Photography",
+      "value": "icbinp"
+    },
+    {
+      "label": "Min-Dalle",
+      "value": "dalle"
+    },
+    {
+      "label": "ControlNet Scribble img2img",
+      "value": "scribble"
+    },
+    {
+      "label": "Stable Diffusion img2img",
+      "value": "img2img"
+    },
+    {
+      "label": "Kandinsky v2.1",
+      "value": "kandinsky2_1"
+    },
+    {
+      "label": "Kandinsky v2.2",
+      "value": "kandinsky2_2"
+    }
+  ],
+  "modelsSettings": {
+    "SD2_1": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": false,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    },
+    "SD2": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": false,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    },
+    "SD1_5": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": false,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    },
+    "waifu": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": false,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    },
+    "beksinski": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": false,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    },
+    "guohua": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": false,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    },
+    "inkpunk": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": false,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    },
+    "dream_shaper": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": false,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    },
+    "open_journey": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": false,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    },
+    "icbinp": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": false,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    },
+    "dalle": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": false,
+        "isImageInput": false,
+        "isStyleSelect": false,
+        "isSeedSlider": false,
+        "isNumberOfImagesSlider": false,
+        "isStepsSlider": false,
+        "isGuidanceScaleSlider": false,
+        "isHeightSlider": false,
+        "isWidthSlider": false
+      }
+    },
+    "scribble": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": true,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    },
+    "img2img": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": true,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    },
+    "kandinsky2_1": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": false,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    },
+    "kandinsky2_2": {
+      "modelElemetsUsage": {
+        "isPrompt": true,
+        "isNegativePromt": true,
+        "isImageInput": false,
+        "isStyleSelect": true,
+        "isSeedSlider": true,
+        "isNumberOfImagesSlider": true,
+        "isStepsSlider": true,
+        "isGuidanceScaleSlider": true,
+        "isHeightSlider": true,
+        "isWidthSlider": true
+      }
+    }
+  },
+  "modelsDefaultValues": {
+    "SD2_1": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 768,
+      "width": 768
+    },
+    "SD2": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 768,
+      "width": 768
+    },
+    "SD1_5": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 768,
+      "width": 768
+    },
+    "waifu": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 768,
+      "width": 768
+    },
+    "beksinski": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 512,
+      "width": 512
+    },
+    "guohua": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 512,
+      "width": 512
+    },
+    "inkpunk": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 512,
+      "width": 512
+    },
+    "dream_shaper": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 768,
+      "width": 768
+    },
+    "open_journey": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 512,
+      "width": 512
+    },
+    "icbinp": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 768,
+      "width": 768
+    },
+    "dalle": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 512,
+      "width": 512
+    },
+    "scribble": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 512,
+      "width": 512
+    },
+    "img2img": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 512,
+      "width": 512
+    },
+    "kandinsky2_1": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 768,
+      "width": 768
+    },
+    "kandinsky2_2": {
+      "prompt": "",
+      "negativePromt": "",
+      "image": null,
+      "style": "Not Set",
+      "seed": 0,
+      "numberOfImages": 3,
+      "steps": 50,
+      "guidanceScale": 9,
+      "height": 768,
+      "width": 768
+    }
+  }
+}
