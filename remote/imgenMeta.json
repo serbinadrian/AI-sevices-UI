@@ -1,5 +1,5 @@
 {
-  "type": "custom",
+  "type": "remote",
   "models": [
     {
       "label": "Stable Diffusion v2.1",
