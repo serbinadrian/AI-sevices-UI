@@ -1,7 +1,7 @@
 // package: SR_GAN
-// file: super_resolution.proto
+// file: image_super_resolution.proto
 
-var super_resolution_pb = require("./super_resolution_pb");
+var image_super_resolution_pb = require("./image_super_resolution_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
 var SR_GAN = (function () {
@@ -15,8 +15,8 @@ SR_GAN.SR = {
   service: SR_GAN,
   requestStream: false,
   responseStream: false,
-  requestType: super_resolution_pb.Q,
-  responseType: super_resolution_pb.A
+  requestType: image_super_resolution_pb.Q,
+  responseType: image_super_resolution_pb.A
 };
 
 exports.SR_GAN = SR_GAN;
