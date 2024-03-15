@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package splitter;
+
+// request structure
+message AudioRequest {
+   bytes audio_data = 1;
+   repeated string selected_tags = 2;
+}
+
+// response structure
+message AudioFile {
+  map<string, bytes> audioMap = 1;
+}
+
+service splitter {
+  rpc SendAudio(AudioRequest) returns (AudioFile);
+}
