@@ -1,36 +1,36 @@
-// package: demixing
-// file: demixing.proto
+// package: splitter
+// file: splitter.proto
 
-var demixing_pb = require("./demixing_pb");
+var splitter_pb = require("./splitter_pb");
 var grpc = require("@improbable-eng/grpc-web").grpc;
 
-var demixing = (function () {
-  function demixing() {}
-  demixing.serviceName = "demixing.demixing";
-  return demixing;
+var splitter = (function () {
+  function splitter() {}
+  splitter.serviceName = "splitter.splitter";
+  return splitter;
 }());
 
-demixing.demixing = {
-  methodName: "demixing",
-  service: demixing,
+splitter.SendAudio = {
+  methodName: "SendAudio",
+  service: splitter,
   requestStream: false,
   responseStream: false,
-  requestType: demixing_pb.Query,
-  responseType: demixing_pb.Answer
+  requestType: splitter_pb.AudioRequest,
+  responseType: splitter_pb.AudioFile
 };
 
-exports.demixing = demixing;
+exports.splitter = splitter;
 
-function demixingClient(serviceHost, options) {
+function splitterClient(serviceHost, options) {
   this.serviceHost = serviceHost;
   this.options = options || {};
 }
 
-demixingClient.prototype.demixing = function demixing(requestMessage, metadata, callback) {
+splitterClient.prototype.sendAudio = function sendAudio(requestMessage, metadata, callback) {
   if (arguments.length === 2) {
     callback = arguments[1];
   }
-  var client = grpc.unary(demixing.demixing, {
+  var client = grpc.unary(splitter.SendAudio, {
     request: requestMessage,
     host: this.serviceHost,
     metadata: metadata,
@@ -57,5 +57,5 @@ demixingClient.prototype.demixing = function demixing(requestMessage, metadata, 
   };
 };
 
-exports.demixingClient = demixingClient;
+exports.splitterClient = splitterClient;
 

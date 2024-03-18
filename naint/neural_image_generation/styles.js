@@ -39,6 +39,15 @@ export const useStyles = (theme) => ({
     lineHeight: "24px",
     textAlign: "center",
   },
+  imageUpload: {
+    "& h6": {
+      fontFamily: "'Muli', sans-serif !important",
+      color: "rgb(102, 102, 102) !important",
+      fontWeight: 400,
+      fontSize: "16px !important",
+      letterSpacing: "0.13px"
+    }
+  },
   imagesContainer: {
     display: "flex",
     flexWrap: "wrap",
@@ -87,5 +96,4 @@ export const useStyles = (theme) => ({
     padding: "5px",
     borderRadius: "5px"
   },
-
 });
