@@ -1,21 +1,19 @@
 syntax = "proto3";
 
-// package name
 package example_service;
 
-// create query structure
-message Query {
-    string text = 1;
-    int32 numbers = 2;
+message Numbers {
+    float a = 1;
+    float b = 2;
 }
 
-// create answer structure
-message Answer {
-  string answer = 1;
+message Result {
+    float value = 1;
 }
 
-// service name
-service example_service {
-    // main method to be called
-    rpc example_service(Query) returns (Answer) {}
+service Calculator {
+    rpc add(Numbers) returns (Result) {}
+    rpc sub(Numbers) returns (Result) {}
+    rpc mul(Numbers) returns (Result) {}
+    rpc div(Numbers) returns (Result) {}
 }
