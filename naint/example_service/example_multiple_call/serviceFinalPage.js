@@ -1,6 +1,8 @@
 import React, { Component } from "react";
+import { withStyles } from "@material-ui/styles";
+import { useStyles } from "./styles";
 
-class ServiceOutput extends Component {
+class serviceFinalPage extends Component {
   constructor(props) {
     super(props);
   }
@@ -16,4 +18,4 @@ class ServiceOutput extends Component {
   }
 }
 
-export default ServiceOutput;
+export default withStyles(useStyles)(serviceFinalPage);

@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import { Calculator } from "./example_pb_service";
-import ServiceInput from "./serviceInput";
-import ServiceOutput from "./serviceOutput";
+import { withStyles } from "@material-ui/styles";
+import { useStyles } from "./styles";
+import ServiceMainPage from "./serviceMainPage";
+import ServiceFinalPage from "./serviceFinalPage";
 
 export const calculatorActions = {
   ADD: "add",
@@ -15,7 +17,7 @@ class ExampleService extends Component {
     super(props);
 
     this.onActionEnd = this.onActionEnd.bind(this);
-    this.submitAction =  this.submitAction.bind(this);
+    this.submitAction = this.submitAction.bind(this);
     this.stopService = this.stopService.bind(this);
 
     this.state = {
@@ -55,17 +57,20 @@ class ExampleService extends Component {
   }
 
   render() {
-    if (!this.props.isComplete) {
-      return (
-        <ServiceInput
-          onSubmitAction={this.submitAction}
-          onstopService={this.stopService}
-          response={this.state.response}
-        />
-      );
-    }
-    return <ServiceOutput />;
+    return (
+      <div className="third-party-service">
+        {!this.props.isComplete ? (
+          <ServiceMainPage
+            onSubmitAction={this.submitAction}
+            onStopService={this.stopService}
+            response={this.state.response}
+          />
+        ) : (
+          <ServiceFinalPage />
+        )}
+      </div>
+    );
   }
 }
 
-export default ExampleService;
+export default withStyles(useStyles)(ExampleService);
