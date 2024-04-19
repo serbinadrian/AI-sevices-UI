@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Calculator } from "./example_pb_service";
+// import { YourService} from ./your_service_pb_service like example below
+// EXAMPLE import { Calculator } from "./example_pb_service";
 import { withStyles } from "@material-ui/styles";
 import { useStyles } from "./styles";
 import { informationBlocks, informationLinks } from "./meta";
@@ -9,49 +10,66 @@ import Grid from "@material-ui/core/Grid";
 import SvgIcon from "@material-ui/core/SvgIcon";
 import HoverIcon from "../../standardComponents/HoverIcon";
 
+// rename CustomService to your own
 class ExampleService extends Component {
   constructor(props) {
     super(props);
 
-    this.onActionEnd = this.onActionEnd.bind(this);
-    this.submitAction = this.submitAction.bind(this);
+    // bind all methods to the class context
     this.SourceIcons = this.SourceIcons.bind(this);
+    // EXAMPLE
+    // this.onActionEnd = this.onActionEnd.bind(this);
+    // this.submitAction = this.submitAction.bind(this)
 
+    // include meta
     this.informationBlocks = informationBlocks;
     this.informationLinks = informationLinks;
 
+    // define variables in state
     this.state = {
       response: undefined,
     };
   }
 
+  // when call is completed
   onActionEnd(response) {
+    // get required data from response
     const { message, status, statusMessage } = response;
+    // check for errors
     if (status !== 0) {
       throw new Error(statusMessage);
     }
 
+    //set to the state
     this.setState({
-      response: message.getValue(),
+      // EXAMPLE response: message.getValue(),
+      response: {}, //use your own get Methods,
     });
   }
 
-  submitAction(action, firstValue, secondValue) {
-    const methodDescriptor = Calculator[action];
+  // EXAMPLE submitAction(action, firstValue, secondValue) {
+  submitAction() {
+    // EXAMPLE const methodDescriptor = Calculator[action];
+    const methodDescriptor = {}; //use your own MD
     const request = new methodDescriptor.requestType();
 
-    request.setA(firstValue);
-    request.setB(secondValue);
+    // set your values using own set Methods
+    // EXAMPLE request.setA(firstValue);
+    // EXAMPLE request.setB(secondValue);
 
+    // construct request
     const props = {
       request,
+      // service will not finish if flag is true
       preventCloseServiceOnEnd: false,
       onEnd: this.onActionEnd,
     };
 
+    //call the service
     this.props.serviceClient.unary(methodDescriptor, props);
   }
 
+  // render source links
   SourceIcons() {
     const { classes } = this.props;
     const { informationBlocks, informationLinks } = this;
@@ -71,17 +89,25 @@ class ExampleService extends Component {
     );
   }
 
+  // render entire component
   render() {
+    // get classes from props
     const { classes } = this.props;
+    // get response from state
     const { response } = this.state;
 
     return (
+      // apply classes to the container
       <Grid container className={classes.serviceContainer}>
+        {/* if service is completed Output will be displayed otherwise INPUT */}
         {!this.props.isComplete ? (
+          // React classes are used as Tags
           <ServiceInput onSubmitAction={this.submitAction} />
         ) : (
+          // pass output
           <ServiceOutput response={response} />
         )}
+        {/* Class render functions are used like classic ones */}
         {this.SourceIcons()}
       </Grid>
     );
