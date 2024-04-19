@@ -1,4 +1,7 @@
 import React, { Component } from "react";
+import { withStyles } from "@material-ui/styles";
+import { useStyles } from "./styles";
+import Grid from "@material-ui/core/Grid";
 import AlertBox from '../../../../components/common/AlertBox';
 
 class ServiceErrors extends Component {
@@ -18,17 +21,18 @@ class ServiceErrors extends Component {
   }
 
   render() {
+    const { classes } = this.props;
     const errorsList = this.getErrorsList();
 
     return (
-      <div className="errors-container">
+      <Grid container direction="column" className={classes.errorsContainer}>
         {errorsList &&
           errorsList.map((error, index) => (
             <AlertBox type="error" key={index} message={error} />
           ))}
-      </div>
+      </Grid>
     );
   }
 }
 
-export default ServiceErrors;
+export default withStyles(useStyles)(ServiceErrors);

@@ -1,10 +1,11 @@
 import React, { Component, Fragment } from "react";
-import { calculatorActions } from ".";
+import { valuesInputs, actionButtons } from "./meta";
 import { withStyles } from "@material-ui/styles";
 import { useStyles } from "./styles";
-import ServiceErrors from "./errors";
+import ServiceErrors from "./ServiceErrors";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
 import OutlinedTextArea from "../../common/OutlinedTextArea";
 
 class ServiceMainPage extends Component {
@@ -17,41 +18,15 @@ class ServiceMainPage extends Component {
     this.isInputValueValid = this.isInputValueValid.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
 
+    this.valuesInputs = valuesInputs;
+    this.actionButtons = actionButtons;
+    
     this.state = {
       firstValue: "",
       secondValue: "",
       errors: new Map(),
     };
 
-    this.valuesInputs = [
-      {
-        label: "First value",
-        valueKey: "firstValue",
-      },
-      {
-        label: "Second value",
-        valueKey: "secondValue",
-      },
-    ];
-
-    this.actionButtons = [
-      {
-        action: calculatorActions.ADD,
-        text: "ADD",
-      },
-      {
-        action: calculatorActions.SUBTRACT,
-        text: "SUBTRACT",
-      },
-      {
-        action: calculatorActions.MULTIPLY,
-        text: "MULTIPLY",
-      },
-      {
-        action: calculatorActions.DIVIDE,
-        text: "DIVIDE",
-      },
-    ];
   }
 
   setError(errorKey, errorMessage) {
@@ -95,9 +70,15 @@ class ServiceMainPage extends Component {
     });
   }
 
-  StopServiceButton() {
-    const { onStopService } = this.props;
-    return <Button type="text" onClick={onStopService}>Finish</Button>
+  ServiceExit() {
+    const { onStopService, classes } = this.props;
+    return (
+      <Grid container className={classes.exitContainer}>
+        <Button onClick={onStopService} variant="text" className={classes.serviceButton}>
+          EXIT
+        </Button>
+      </Grid>
+    );
   }
 
   InputFields() {
@@ -105,19 +86,21 @@ class ServiceMainPage extends Component {
     const { classes } = this.props;
 
     return (
-      <Fragment>
-        <h2>Input values</h2>
-        <div className="input-values">
+      <Grid container className={classes.contentBox}>
+        <Typography variant="h2">Input values</Typography>
+        <Grid container direction="column" className="input-values">
           {valuesInputs.map(valueInput => (
-            <OutlinedTextArea
-              label={valueInput.label}
-              value={this.state[valueInput.valueKey]}
-              name={valueInput.valueKey}
-              onChange={this.onValueChange}
-            />
+            <Grid item>
+              <OutlinedTextArea
+                label={valueInput.label}
+                value={this.state[valueInput.valueKey]}
+                name={valueInput.valueKey}
+                onChange={this.onValueChange}
+              />
+            </Grid>
           ))}
-        </div>
-      </Fragment>
+        </Grid>
+      </Grid>
     );
   }
 
@@ -127,37 +110,41 @@ class ServiceMainPage extends Component {
     const { firstValue, secondValue } = this.state;
 
     return (
-      <Fragment>
-        <h2>Actions</h2>
-        <div className="action-buttons">
+      <Grid container className={classes.contentBox}>
+        <Typography variant="h2">Actions</Typography>
+        <Grid container className="action-buttons">
           {actionButtons.map(actionButton => (
             <Button
               variant="contained"
               key={actionButton.action}
               className={classes.serviceButton}
               onClick={() => onSubmitAction(actionButton.action, firstValue, secondValue)}
-              disabled={!this.isAvailableToRun}
+              disabled={!this.isAvailableToRun()}
             >
               {actionButton.text}
             </Button>
           ))}
-        </div>
-      </Fragment>
+        </Grid>
+      </Grid>
     );
   }
-
+  
   ResultField() {
     const { response, classes } = this.props;
 
     return (
-      <Fragment>
-        {response && (
-          <div className="calculation-result">
-            <h2>Result</h2>
-            <OutlinedTextArea label="Result Value" value={response}></OutlinedTextArea>
-          </div>
+      <Grid container className={classes.contentBox}>
+        {response !== undefined && (
+          <Fragment>
+            <Typography variant="h2">Result</Typography>
+            <Grid container direction="column" className="calculation-result">
+              <Grid item>
+                <OutlinedTextArea label="Result Value" value={response}></OutlinedTextArea>
+              </Grid>
+            </Grid>
+          </Fragment>
         )}
-      </Fragment>
+      </Grid>
     );
   }
 
@@ -167,11 +154,12 @@ class ServiceMainPage extends Component {
 
     return (
       <Fragment>
-        <div className={classes.serviceMainPage}>
+        <Grid container className={classes.serviceMainPage}>
+          {this.ServiceExit()}
           {this.InputFields()}
           {this.ActionButtons()}
           {this.ResultField()}
-        </div>
+        </Grid>
         <ServiceErrors errors={errors} />
       </Fragment>
     );

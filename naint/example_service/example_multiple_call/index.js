@@ -2,15 +2,12 @@ import React, { Component } from "react";
 import { Calculator } from "./example_pb_service";
 import { withStyles } from "@material-ui/styles";
 import { useStyles } from "./styles";
-import ServiceMainPage from "./serviceMainPage";
-import ServiceFinalPage from "./serviceFinalPage";
-
-export const calculatorActions = {
-  ADD: "add",
-  SUBTRACT: "sub",
-  MULTIPLY: "mul",
-  DIVIDE: "div",
-};
+import { informationBlocks, informationLinks } from "./meta";
+import ServiceMainPage from "./ServiceMainPage";
+import ServiceFinalPage from "./ServiceFinalPage";
+import Grid from "@material-ui/core/Grid";
+import SvgIcon from "@material-ui/core/SvgIcon";
+import HoverIcon from "../../standardComponents/HoverIcon";
 
 class ExampleService extends Component {
   constructor(props) {
@@ -19,6 +16,10 @@ class ExampleService extends Component {
     this.onActionEnd = this.onActionEnd.bind(this);
     this.submitAction = this.submitAction.bind(this);
     this.stopService = this.stopService.bind(this);
+    this.SourceIcons = this.SourceIcons.bind(this);
+
+    this.informationBlocks = informationBlocks;
+    this.informationLinks = informationLinks;
 
     this.state = {
       response: undefined,
@@ -56,9 +57,33 @@ class ExampleService extends Component {
     this.props.serviceClient.stopService();
   }
 
-  render() {
+  SourceIcons() {
+    const { classes } = this.props;
+    const { informationBlocks, informationLinks } = this;
+
     return (
-      <div className="third-party-service">
+      <Grid item xs container justify="flex-end">
+        {Object.values(informationBlocks).map((informationBlock) => (
+          <Grid item key={informationBlock.key} className={classes.infoBlock}>
+            <HoverIcon
+              text={informationBlock.label}
+              href={informationLinks[informationLinks.linkKey]}
+            >
+              <SvgIcon>
+                <path d={informationBlock.svgPath} />
+              </SvgIcon>
+            </HoverIcon>
+          </Grid>
+        ))}
+      </Grid>
+    );
+  }
+
+  render() {
+    const { classes } = this.props;
+
+    return (
+      <Grid container className={classes.serviceContainer}>
         {!this.props.isComplete ? (
           <ServiceMainPage
             onSubmitAction={this.submitAction}
@@ -68,7 +93,8 @@ class ExampleService extends Component {
         ) : (
           <ServiceFinalPage />
         )}
-      </div>
+        {this.SourceIcons()}
+      </Grid>
     );
   }
 }
