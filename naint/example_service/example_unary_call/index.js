@@ -3,8 +3,8 @@ import { Calculator } from "./example_pb_service";
 import { withStyles } from "@material-ui/styles";
 import { useStyles } from "./styles";
 import { informationBlocks, informationLinks } from "./meta";
-import ServiceMainPage from "./ServiceMainPage";
-import ServiceFinalPage from "./ServiceFinalPage";
+import ServiceInput from "./ServiceInput";
+import ServiceOutput from "./ServiceOutput";
 import Grid from "@material-ui/core/Grid";
 import SvgIcon from "@material-ui/core/SvgIcon";
 import HoverIcon from "../../standardComponents/HoverIcon";
@@ -15,7 +15,6 @@ class ExampleService extends Component {
 
     this.onActionEnd = this.onActionEnd.bind(this);
     this.submitAction = this.submitAction.bind(this);
-    this.stopService = this.stopService.bind(this);
     this.SourceIcons = this.SourceIcons.bind(this);
 
     this.informationBlocks = informationBlocks;
@@ -46,15 +45,11 @@ class ExampleService extends Component {
 
     const props = {
       request,
-      preventCloseServiceOnEnd: true,
+      preventCloseServiceOnEnd: false,
       onEnd: this.onActionEnd,
     };
 
     this.props.serviceClient.unary(methodDescriptor, props);
-  }
-
-  stopService() {
-    this.props.serviceClient.stopService();
   }
 
   SourceIcons() {
@@ -82,13 +77,9 @@ class ExampleService extends Component {
     return (
       <Grid container className={classes.serviceContainer}>
         {!this.props.isComplete ? (
-          <ServiceMainPage
-            onSubmitAction={this.submitAction}
-            onStopService={this.stopService}
-            response={this.state.response}
-          />
+          <ServiceInput onSubmitAction={this.submitAction} />
         ) : (
-          <ServiceFinalPage />
+          <ServiceOutput response={this.state.response} />
         )}
         {this.SourceIcons()}
       </Grid>

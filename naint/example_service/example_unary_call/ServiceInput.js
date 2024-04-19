@@ -8,7 +8,7 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import OutlinedTextArea from "../../common/OutlinedTextArea";
 
-class ServiceMainPage extends Component {
+class ServiceInput extends Component {
   constructor(props) {
     super(props);
 
@@ -17,7 +17,6 @@ class ServiceMainPage extends Component {
     this.isAvailableToRun = this.isAvailableToRun.bind(this);
     this.isInputValueValid = this.isInputValueValid.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
-    this.ResultField = this.ResultField.bind(this);
 
     this.valuesInputs = valuesInputs;
     this.actionButtons = actionButtons;
@@ -70,17 +69,6 @@ class ServiceMainPage extends Component {
     });
   }
 
-  ServiceExit() {
-    const { onStopService, classes } = this.props;
-    return (
-      <Grid container className={classes.exitContainer}>
-        <Button onClick={onStopService} variant="text" className={classes.serviceButton}>
-          EXIT
-        </Button>
-      </Grid>
-    );
-  }
-
   InputFields() {
     const { valuesInputs } = this;
     const { classes } = this.props;
@@ -129,25 +117,6 @@ class ServiceMainPage extends Component {
     );
   }
 
-  ResultField() {
-    const { response, classes } = this.props;
-
-    return (
-      <Grid container className={classes.contentBox}>
-        {response !== undefined && (
-          <Fragment>
-            <Typography variant="h2">Result</Typography>
-            <Grid container direction="column" className="calculation-result">
-              <Grid item>
-                <OutlinedTextArea label="Result Value" value={response}></OutlinedTextArea>
-              </Grid>
-            </Grid>
-          </Fragment>
-        )}
-      </Grid>
-    );
-  }
-
   render() {
     const { classes } = this.props;
     const { errors } = this.state;
@@ -155,10 +124,8 @@ class ServiceMainPage extends Component {
     return (
       <Fragment>
         <Grid container className={classes.serviceMainPage}>
-          {this.ServiceExit()}
           {this.InputFields()}
           {this.ActionButtons()}
-          {this.ResultField()}
         </Grid>
         <ServiceErrors errors={errors} />
       </Fragment>
@@ -166,4 +133,4 @@ class ServiceMainPage extends Component {
   }
 }
 
-export default withStyles(useStyles)(ServiceMainPage);
+export default withStyles(useStyles)(ServiceInput);
