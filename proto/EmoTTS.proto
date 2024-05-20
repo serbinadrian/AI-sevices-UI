@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package tts;
+
+service EmoTTS {
+    rpc tts(SynthesisRequest) returns (SynthesisResponse) {}
+}
+
+message SynthesisRequest {
+    string text = 1;
+    int32 emotion = 2;
+    int32 sid = 3;
+}
+
+message SynthesisResponse {
+    string audio = 1;
+    string text = 2;
+    float inference_time = 3;
+}
