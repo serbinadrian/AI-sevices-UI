@@ -8,6 +8,7 @@ export const MODEL = {
         response: undefined,
         textInputValue: '',
         emotionValue: '',
+        speakerSpeedValue: 0,
         genderValue: '',
         ageValue: '',
         toneValue: '',
@@ -22,6 +23,12 @@ export const MODEL = {
             ONLY_LATINS_TEXT_LENGTH: {
                 min: 1,
                 max: 300,
+            },
+            SPEAKER_SPEED_RESTRICTION: {
+                min: -1,
+                max: 1,
+                step: 0.2,
+                stateKey: 'speakerSpeed',
             },
         },
         valueRestrictions: {
@@ -49,6 +56,19 @@ export const BLOCKS = {
             helperFunctionKey: 'inputMaxLengthHelperFunction',
             rangeRestrictionKey: 'ONLY_LATINS_TEXT_LENGTH',
             labelKey: 'TEXT_INPUT',
+        },
+        SPEAKER_SPEED_INPUT: {
+            type: 'slider',
+            id: 'speaker-speed-input',
+            name: 'speakerSpeedValue',
+            stateKey: 'speakerSpeedValue',
+            handleFunctionKey: 'handleSelectItem',
+            rangeRestrictionKey: 'SPEAKER_SPEED_RESTRICTION',
+            min: -1,
+            max: 1,
+            step: 0.1,
+            labelKey: 'SPEAKER_SPEED',
+            points: [-1, 0, 1],
         },
         EMOTION_INPUT: {
             type: 'dropdown',
@@ -201,6 +221,7 @@ export const LABELS = {
         VOICE: 'Voice',
         DISPLAYED: 'Displayed',
         ROWS_OF: 'rows of',
+        SPEAKER_SPEED: 'Speed of the audio',
     },
     status: {
         NO_RESPONSE: 'Something went wrong...',

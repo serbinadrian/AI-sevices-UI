@@ -93,7 +93,8 @@ tts_naint_EmoTTS.SynthesisRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     text: jspb.Message.getFieldWithDefault(msg, 1, ""),
     emotion: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    sid: jspb.Message.getFieldWithDefault(msg, 3, 0)
+    sid: jspb.Message.getFieldWithDefault(msg, 3, 0),
+    speed: jspb.Message.getFloatingPointFieldWithDefault(msg, 4, 0.0)
   };
 
   if (includeInstance) {
@@ -142,6 +143,10 @@ tts_naint_EmoTTS.SynthesisRequest.deserializeBinaryFromReader = function(msg, re
       var value = /** @type {number} */ (reader.readInt32());
       msg.setSid(value);
       break;
+    case 4:
+      var value = /** @type {number} */ (reader.readFloat());
+      msg.setSpeed(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -189,6 +194,13 @@ tts_naint_EmoTTS.SynthesisRequest.serializeBinaryToWriter = function(message, wr
   if (f !== 0) {
     writer.writeInt32(
       3,
+      f
+    );
+  }
+  f = message.getSpeed();
+  if (f !== 0.0) {
+    writer.writeFloat(
+      4,
       f
     );
   }
@@ -246,6 +258,24 @@ tts_naint_EmoTTS.SynthesisRequest.prototype.getSid = function() {
  */
 tts_naint_EmoTTS.SynthesisRequest.prototype.setSid = function(value) {
   return jspb.Message.setProto3IntField(this, 3, value);
+};
+
+
+/**
+ * optional float speed = 4;
+ * @return {number}
+ */
+tts_naint_EmoTTS.SynthesisRequest.prototype.getSpeed = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 4, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!tts_naint_EmoTTS.SynthesisRequest} returns this
+ */
+tts_naint_EmoTTS.SynthesisRequest.prototype.setSpeed = function(value) {
+  return jspb.Message.setProto3FloatField(this, 4, value);
 };
 
 

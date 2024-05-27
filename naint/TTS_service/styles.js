@@ -22,22 +22,30 @@ export const useStyles = (theme) => ({
         color: '#454545',
         width: '100%',
     },
+    sliderComponentContainer: {
+        marginTop: 20,
+    },
+    sliderContainer: {
+        padding: '30px',
+        marginTop: 10,
+        maxWidth: '100%',
+        alignItems: 'center',
+        display: 'flex',
+        '& .MuiSlider-root': { color: theme.palette.text.primary },
+    },
+    inputLineContainer: {
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 30,
+        padding: '10px 0',
+        margin: '0 0 10px 0',
+    },
     inputLine: {
         display: 'flex',
         justifyContent: 'space-between',
-        background: '#F1F1F1',
-        borderRadius: '5px',
-        padding: '10px',
-        margin: '0 0 10px 0',
         cursor: 'pointer',
-        transition: 'all 0.1s',
-        width: '100%',
-        '&:hover': {
-            background: '#DCDCDC',
-        },
-        '&:active': {
-            background: '#C4C4C4',
-        },
     },
     radioButton: {
         color: `${theme.backgroundColor.blue} !important`,
@@ -50,7 +58,7 @@ export const useStyles = (theme) => ({
         padding: 10,
         borderRadius: '5px',
     },
-    outputResult: {
+    audio: {
         width: '100%',
         height: 50,
     },

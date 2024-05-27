@@ -5,12 +5,16 @@ import OutlinedDropdown from '../../common/OutlinedDropdown';
 import Button from '@material-ui/core/Button';
 import SvgIcon from '@material-ui/core/SvgIcon';
 import Radio from '@material-ui/core/Radio';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Slider from '@material-ui/core/Slider';
 import HoverIcon from '../../standardComponents/HoverIcon';
 import AlertBox, { alertTypes } from '../../../../components/common/AlertBox';
 import { EmoTTS } from './tts_pb_service';
 import { MODEL, BLOCKS, LABELS } from './metadata';
-import { VOICES, DROPDOWN_PARAMETERS } from './inputParameters';
+import {
+    VOICES,
+    VOICE_EXAMPLE_SRC,
+    DROPDOWN_PARAMETERS,
+} from './inputParameters';
 import { useStyles } from './styles';
 import { withStyles } from '@material-ui/styles';
 import { isEmpty } from 'lodash';
@@ -143,7 +147,12 @@ class TTS extends Component {
     }
 
     submitAction() {
-        const { textInputValue, emotionValue, selectedVoice } = this.state;
+        const {
+            textInputValue,
+            speakerSpeedValue,
+            emotionValue,
+            selectedVoice,
+        } = this.state;
         const { service } = MODEL;
 
         const methodDescriptor = EmoTTS[service.METHOD];
@@ -151,6 +160,7 @@ class TTS extends Component {
 
         request.setText(textInputValue);
         request.setEmotion(emotionValue);
+        request.setSpeed(speakerSpeedValue);
         request.setSid(selectedVoice);
 
         const props = {
@@ -242,6 +252,44 @@ class TTS extends Component {
         );
     }
 
+    changeSlider(elementName, value) {
+        this.setState({
+            [elementName]: value,
+        });
+    }
+
+    renderSlider(meta) {
+        const { labels } = LABELS;
+        const { classes } = this.props;
+        const points = meta.points.map((point) => {
+            return { label: point, value: point };
+        });
+        return (
+            <Grid
+                item
+                xs={12}
+                key={meta.id}
+                className={classes.sliderComponentContainer}
+            >
+                <Grid item xs={12}>
+                    <span>{labels[meta.labelKey]}</span>
+                </Grid>
+                <Grid item xs={12} className={classes.sliderContainer}>
+                    <Slider
+                        name={meta.name}
+                        value={this.state[meta.stateKey]}
+                        max={Number(meta.max)}
+                        min={Number(meta.min)}
+                        step={meta.step}
+                        valueLabelDisplay='on'
+                        marks={points}
+                        onChange={(e, v) => this.changeSlider(meta.stateKey, v)}
+                    />
+                </Grid>
+            </Grid>
+        );
+    }
+
     renderInputFilterDropdowns() {
         const { inputBlocks } = BLOCKS;
 
@@ -266,22 +314,17 @@ class TTS extends Component {
         const { classes } = this.props;
 
         return (
-            <FormControlLabel
-                key={meta.id}
-                className={classes.inputLine}
-                value={meta.id}
-                onChange={this[RADIO_BUTTON.handleFunctionKey]}
-                label={LABELS.labels.VOICE + SPACE + ++index}
-                labelPlacement='start'
-                control={
-                    <Radio
-                        className={classes.radioButton}
-                        name={RADIO_BUTTON.name}
-                        value={meta.id}
-                        checked={meta.id === Number(selectedVoice)}
-                    />
-                }
-            />
+            <div className={classes.inputLineContainer}>
+                <span>{++index}</span>
+                {this.renderAudio(VOICE_EXAMPLE_SRC(meta.id))}
+                <Radio
+                    className={classes.radioButton}
+                    name={RADIO_BUTTON.name}
+                    value={meta.id}
+                    checked={meta.id === Number(selectedVoice)}
+                    onChange={this[RADIO_BUTTON.handleFunctionKey]}
+                />
+            </div>
         );
     }
 
@@ -427,6 +470,7 @@ class TTS extends Component {
             <Grid container direction='column' justifyContent='center'>
                 {this.renderTextArea(inputBlocks.TEXT_INPUT)}
                 {this.renderDropdown(inputBlocks.EMOTION_INPUT)}
+                {this.renderSlider(inputBlocks.SPEAKER_SPEED_INPUT)}
                 <h4>{LABELS.labels.FILTER_HEADER}</h4>
                 {this.renderInputFilterDropdowns()}
                 {this.renderInputFilteredVoices()}
@@ -448,21 +492,26 @@ class TTS extends Component {
         return audioUrl;
     }
 
-    renderAudio() {
+    renderAudio(audioSrc) {
+        const { classes } = this.props;
+
+        return (
+            <audio controls src={audioSrc} className={classes.audio} />
+        );
+    }
+
+    renderOutputAudio() {
         const { labels } = LABELS;
         const { classes } = this.props;
         const src = this.createAudioUrl(this.state.response);
+
         return (
             <Grid container>
                 <p className={classes.outputResultHeader}>
                     {labels.SERVICE_OUTPUT}
                 </p>
                 <Grid xs={12} item justifyContent='center'>
-                    <audio
-                        controls
-                        src={src}
-                        className={classes.outputResult}
-                    />
+                    {this.renderAudio(src)}
                 </Grid>
             </Grid>
         );
@@ -481,7 +530,7 @@ class TTS extends Component {
             <Grid container direction='column' justifyContent='center'>
                 {this.renderUserPreferences()}
                 {this.renderTextArea(outputBlocks.USER_TEXT_INPUT)}
-                {this.renderAudio()}
+                {this.renderOutputAudio()}
                 {this.renderInfoBlock()}
             </Grid>
         );
